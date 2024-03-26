@@ -204,12 +204,8 @@ std::vector<BigInteger> SieveOfEratosthenes(const BigInteger& n)
     return knownPrimes;
 }
 
-std::vector<BigInteger> SegmentedSieveOfEratosthenes(const BigInteger& n)
+std::vector<BigInteger> SegmentedSieveOfEratosthenes(const size_t& n, const size_t& limit)
 {
-    // TODO: This should scale to the system.
-    // It's 8 GB in bits.
-    const size_t limit = 68719476736ULL;
-
     // `backward(n)` counts assuming that multiples
     // of 2 and 3 have been removed.
     if (backward(n) <= limit) {
@@ -315,6 +311,7 @@ using namespace qimcifa;
 
 PYBIND11_MODULE(eratosthenes, m) {
     m.doc() = "pybind11 plugin to generate prime numbers";
-    m.def("sieve", &SegmentedSieveOfEratosthenes, "Returns all primes up to the value of its argument (using Sieve of Eratosthenes)");
+    m.def("sieve", &SieveOfEratosthenes, "Returns all primes up to the value of its argument (using Sieve of Eratosthenes)");
+    m.def("segmented_sieve", &SegmentedSieveOfEratosthenes, "Second argument is bit-allocation limit (8 * bytes) before segmenting, capping memory footprint");
     m.def("trial_division", &TrialDivision, "Returns all primes up to the value of its argument (using Trial Division)");
 }
