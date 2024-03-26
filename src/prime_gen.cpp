@@ -204,7 +204,7 @@ std::vector<BigInteger> SieveOfEratosthenes(const BigInteger& n)
     return knownPrimes;
 }
 
-std::vector<BigInteger> SegmentedSieveOfEratosthenes(const size_t& n, const size_t& limit)
+std::vector<BigInteger> SegmentedSieveOfEratosthenes(const BigInteger& n, const size_t& limit)
 {
     // `backward(n)` counts assuming that multiples
     // of 2 and 3 have been removed.
