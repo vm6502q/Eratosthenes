@@ -234,7 +234,7 @@ std::vector<BigInteger> SegmentedSieveOfEratosthenes(const BigInteger& n, const 
 
         // Use the found primes by simpleSieve() to find
         // primes in current range
-        for (size_t k = 2U; k < knownPrimes.size(); k++) {
+        for (size_t k = 3U; k < knownPrimes.size(); k++) {
             // Find the minimum number in [low..high] that is
             // a multiple of prime[i] (divisible by prime[i])
             // For example, if low is 31 and prime[i] is 3,
