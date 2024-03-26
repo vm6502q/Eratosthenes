@@ -16,13 +16,7 @@
 #include <vector>
 
 #include <boost/dynamic_bitset.hpp>
-#if USE_GMP
-#include <boost/multiprecision/gmp.hpp>
-#elif USE_BOOST
 #include <boost/multiprecision/cpp_int.hpp>
-#else
-#include "big_integer.hpp"
-#endif
 
 #include "dispatchqueue.hpp"
 
@@ -36,15 +30,9 @@ typedef uint32_t BigInteger;
 #elif BIG_INT_BITS < 65
 typedef uint64_t BigInteger;
 #else
-#if USE_GMP
-typedef boost::multiprecision::mpz_int BigInteger;
-#elif USE_BOOST
 typedef boost::multiprecision::number<boost::multiprecision::cpp_int_backend<BIG_INT_BITS, BIG_INT_BITS,
     boost::multiprecision::unsigned_magnitude, boost::multiprecision::unchecked, void>>
     BigInteger;
-#else
-typedef BigInteger BigInteger;
-#endif
 #endif
 
 inline BigInteger sqrt(const BigInteger& toTest)

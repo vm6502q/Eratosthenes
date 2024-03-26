@@ -1,3 +1,4 @@
+import os
 from distutils.core import setup, Extension
 
 cpp_args = ['-std=c++17', '-lpthread']
@@ -9,8 +10,8 @@ with open(README_PATH) as readme_file:
 ext_modules = [
     Extension(
         'eratosthenes',
-        ['prime_gen.cpp', "dispatchqueue.cpp"],
-        include_dirs=['pybind11/include'],
+        ['src/prime_gen.cpp', "src/dispatchqueue.cpp"],
+        include_dirs=['src/include', 'pybind11/include'],
         language='c++',
         extra_compile_args = cpp_args,
     ),
