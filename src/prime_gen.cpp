@@ -208,7 +208,7 @@ std::vector<BigInteger> SegmentedSieveOfEratosthenes(const BigInteger& n, const 
 {
     // `backward(n)` counts assuming that multiples
     // of 2 and 3 have been removed.
-    if (backward(n) <= limit) {
+    if (backward5(n) <= limit) {
         return SieveOfEratosthenes(n);
     }
 
@@ -228,8 +228,8 @@ std::vector<BigInteger> SegmentedSieveOfEratosthenes(const BigInteger& n, const 
         }
 
         // Cardinality with multiples of 2 and 3 removed is 1/3 of total.
-        const BigInteger bLow = backward(low);
-        const size_t cardinality = (size_t)(backward(high) - bLow);
+        const BigInteger bLow = backward5(low);
+        const size_t cardinality = (size_t)(backward5(high) - bLow);
         boost::dynamic_bitset<size_t> notPrime(cardinality + 1U);
 
         // Use the found primes by simpleSieve() to find
@@ -251,7 +251,7 @@ std::vector<BigInteger> SegmentedSieveOfEratosthenes(const BigInteger& n, const 
                 if ((i & 1U) == 0U) {
                     i += p;
                 }
-                if ((i % 3U) == 0U) {
+                while (((i % 3U) == 0U) || ((i % 5U) == 0U)) {
                     i += p2;
                 }
 
@@ -262,7 +262,7 @@ std::vector<BigInteger> SegmentedSieveOfEratosthenes(const BigInteger& n, const 
                 // we can proceed with the 1 remainder loop.
                 // This saves 2/3 of updates (or modulo).
                 if ((i % 3U) == 2U) {
-                    const size_t q = (size_t)(backward(i) - bLow);
+                    const size_t q = (size_t)(backward5(i) - bLow);
                     if (q > cardinality) {
                         return false;
                     }
@@ -270,15 +270,60 @@ std::vector<BigInteger> SegmentedSieveOfEratosthenes(const BigInteger& n, const 
                     i += p2;
                 }
 
+                uint32_t wheel30 = 0U;
+                for (int j = 0; j < 30; j += 2) {
+                    size_t q = (size_t)(backward5(i) - bLow);
+                    if (q > cardinality) {
+                        return false;
+                    }
+                    if (i % 5) {
+                        wheel30 |= (1ULL << j);
+                        notPrime[q] = true;
+                    }
+                    i += p4;
+
+                    q = (size_t)(backward5(i) - bLow);
+                    if (q > cardinality) {
+                        return false;
+                    }
+                    if (i % 5) {
+                        wheel30 |= (1ULL << (j + 1U));
+                        notPrime[q] = true;
+                    }
+                    i += p2;
+                }
+
                 for (;;) {
-                    size_t q = (size_t)(backward(i) - bLow);
+                    for (int j = 0; j < 30; j+=2) {
+                        size_t q = (size_t)(backward5(i) - bLow);
+                        if (q > cardinality) {
+                            return false;
+                        }
+                        if ((wheel30 >> j) & 1U) {
+                            notPrime[q] = true;
+                        }
+                        i += p4;
+
+                        q = (size_t)(backward5(i) - bLow);
+                        if (q > cardinality) {
+                            return false;
+                        }
+                        if ((wheel30 >> (j + 1)) & 1U) {
+                            notPrime[q] = true;
+                        }
+                        i += p2;
+                    }
+                }
+
+                for (;;) {
+                    size_t q = (size_t)(backward5(i) - bLow);
                     if (q > cardinality) {
                         return false;
                     }
                     notPrime[q] = true;
                     i += p4;
 
-                    q = (size_t)(backward(i) - bLow);
+                    q = (size_t)(backward5(i) - bLow);
                     if (q > cardinality) {
                         return false;
                     }
@@ -292,10 +337,19 @@ std::vector<BigInteger> SegmentedSieveOfEratosthenes(const BigInteger& n, const 
         dispatch.finish();
 
         // Numbers which are not marked as false are prime
-        for (size_t q = 0; q <= cardinality; ++q) {
+        size_t q = 0U;
+        for (size_t o = 0U; ; ++o) {
+            const size_t p = forward(o);
+            if (p > cardinality) {
+                break;
+            }
+            if ((p % 5U) == 0U) {
+                continue;
+            }
             if (notPrime[q]) {
                 knownPrimes.push_back(forward(q + bLow));
             }
+            ++q;
         }
 
         // Update low and high for next segment

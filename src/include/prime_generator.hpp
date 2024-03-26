@@ -202,7 +202,7 @@ inline size_t GetWheel5Increment(uint32_t& wheel5) {
 
 inline BigInteger makeNotMultiple(BigInteger n) {
     n |= 1U;
-    if ((n % 3U) == 0U) {
+    while (((n % 3U) == 0U) || ((n % 5U) == 0U)) {
         n -= 2U;
     }
 
