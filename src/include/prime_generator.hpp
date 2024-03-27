@@ -64,4 +64,5 @@ inline size_t GetWheel5Increment(uint32_t& wheel5) {
 }
 
 std::vector<BigInteger> SieveOfEratosthenes(const BigInteger& n);
+BigInteger CountPrimesTo(const BigInteger& n);
 } // namespace qimcifa

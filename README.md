@@ -7,7 +7,10 @@ Fast prime generation for Python based on Sieve of Eratosthenes
 from eratosthenes import sieve
 
 # This is a Sieve of Eratosthenes with wheel factorization.
-p1 = sieve(1000)
+primes = sieve(1000)
+
+# This uses the same logic to count primes up the argument.
+num_primes = count(1000)
 ```
 
 ## About
