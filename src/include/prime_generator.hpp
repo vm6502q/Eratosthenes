@@ -12,7 +12,6 @@
 
 #include "config.h"
 
-#include <iostream>
 #include <vector>
 
 #if BIG_INT_BITS > 64
@@ -33,32 +32,6 @@ typedef boost::multiprecision::number<boost::multiprecision::cpp_int_backend<BIG
     boost::multiprecision::unsigned_magnitude, boost::multiprecision::unchecked, void>>
     BigInteger;
 #endif
-
-inline BigInteger sqrt(const BigInteger& toTest)
-{
-    // Otherwise, find b = sqrt(b^2).
-    BigInteger start = 1U, end = toTest >> 1U, ans = 0U;
-    do {
-        const BigInteger mid = (start + end) >> 1U;
-
-        // If toTest is a perfect square
-        const BigInteger sqr = mid * mid;
-        if (sqr == toTest) {
-            return mid;
-        }
-
-        if (sqr < toTest) {
-            // Since we need floor, we update answer when mid*mid is smaller than p, and move closer to sqrt(p).
-            start = mid + 1U;
-            ans = mid;
-        } else {
-            // If mid*mid is greater than p
-            end = mid - 1U;
-        }
-    } while (start <= end);
-
-    return ans;
-}
 
 inline BigInteger backward(const BigInteger& n) {
     return ((~((~n) | 1U)) / 3U) + 1U;
@@ -88,15 +61,6 @@ inline size_t GetWheel5Increment(uint32_t& wheel5) {
     } while (is_wheel_multiple);
 
     return wheelIncrement;
-}
-
-inline BigInteger makeNotMultiple(BigInteger n) {
-    n |= 1U;
-    while (((n % 3U) == 0U) || ((n % 5U) == 0U)) {
-        n -= 2U;
-    }
-
-    return n;
 }
 
 std::vector<BigInteger> SieveOfEratosthenes(const BigInteger& n);
