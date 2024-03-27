@@ -116,7 +116,7 @@ std::vector<BigInteger> SieveOfEratosthenes(const BigInteger& n)
             continue;
         }
 
-        knownPrimes.push_back(p);
+        // knownPrimes.push_back(p);
 
         dispatch.dispatch([&n, p, &notPrime]() {
             // We are skipping multiples of 2, 3, and 5
@@ -186,6 +186,8 @@ std::vector<BigInteger> SieveOfEratosthenes(const BigInteger& n)
     }
     dispatch.finish();
 
+    wheel5 = (1U << 7U) | 1U;
+    o = 1U;
     for (;;) {
         const BigInteger p = forward(o);
         if (p > n) {
