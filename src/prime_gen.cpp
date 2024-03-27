@@ -177,7 +177,7 @@ BigInteger CountPrimesTo(const BigInteger& n)
     // Get the remaining prime numbers.
     uint32_t wheel5 = (1U << 7U) | 1U;
     size_t o = 1U;
-    BigInteger count = 0U;
+    BigInteger count = 3U;
     for (;;) {
         o += GetWheel5Increment(wheel5);
 
