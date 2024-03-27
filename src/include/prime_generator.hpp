@@ -15,8 +15,9 @@
 #include <iostream>
 #include <vector>
 
-#include <boost/dynamic_bitset.hpp>
+#if BIG_INT_BITS > 64
 #include <boost/multiprecision/cpp_int.hpp>
+#endif
 
 #include "dispatchqueue.hpp"
 
