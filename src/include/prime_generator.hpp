@@ -21,9 +21,7 @@
 #include "dispatchqueue.hpp"
 
 namespace qimcifa {
-const size_t BATCH_SIZE = 1 << 10;
-const size_t cpuCount = std::thread::hardware_concurrency();
-DispatchQueue dispatch(cpuCount);
+DispatchQueue dispatch(std::thread::hardware_concurrency());
 
 #if BIG_INT_BITS < 33
 typedef uint32_t BigInteger;
@@ -76,115 +74,6 @@ inline BigInteger backward5(BigInteger n) {
     return (n + 1U) >> 1U;
 }
 
-bool isMultipleParallel(const BigInteger& p, const size_t& nextPrimeIndex, const size_t& highestIndex,
-    const std::vector<BigInteger>& knownPrimes) {
-    const size_t _BATCH_SIZE = BATCH_SIZE;
-    const size_t maxLcv = (highestIndex - nextPrimeIndex) / BATCH_SIZE;
-    dispatch.resetResult();
-    for (size_t i = 0; i < maxLcv; ++i) {
-        size_t j = i * BATCH_SIZE + nextPrimeIndex;
-        dispatch.dispatch([&knownPrimes, &p, _BATCH_SIZE, j]() {
-            for (size_t k = 0; k < _BATCH_SIZE; ++k) {
-                if ((p % knownPrimes[j + k]) == 0) {
-                    return true;
-                }
-            }
-            return false;
-        });
-    }
-
-    return dispatch.finish();
-}
-
-bool isMultiple(const BigInteger& p, size_t nextIndex, const std::vector<BigInteger>& knownPrimes) {
-    const BigInteger sqrtP = sqrt(p);
-    const size_t highestIndex = std::distance(knownPrimes.begin(), std::upper_bound(knownPrimes.begin(), knownPrimes.end(), sqrtP));
-
-    const size_t diff = highestIndex - nextIndex;
-    if ((highestIndex > nextIndex) && ((diff >> 1U) > BATCH_SIZE)) {
-        if (isMultipleParallel(p, nextIndex, highestIndex, knownPrimes)) {
-            return true;
-        }
-    }
-    nextIndex = diff % BATCH_SIZE;
-
-    for (size_t i = nextIndex; i < highestIndex; ++i) {
-        if ((p % knownPrimes[i]) == 0) {
-            return true;
-        }
-    }
-    return false;
-}
-
-template <typename BigInteger>
-bool isMultiple(const BigInteger& p, const std::vector<BigInteger>& knownPrimes) {
-    for (const BigInteger& prime : knownPrimes) {
-        if ((p % prime) == 0) {
-            return true;
-        }
-    }
-    return false;
-}
-
-template <typename BigInteger>
-boost::dynamic_bitset<size_t> wheel_inc(std::vector<BigInteger> primes, BigInteger limit) {
-    BigInteger radius = 1U;
-    for (const BigInteger& i : primes) {
-        radius *= i;
-    }
-    if (limit < radius) {
-        radius = limit;
-    }
-    const BigInteger prime = primes.back();
-    primes.pop_back();
-    std::vector<bool> o;
-    for (BigInteger i = 1U; i <= radius; ++i) {
-        if (!isMultiple(i, primes)) {
-            o.push_back((i % prime) == 0);
-        }
-    }
-
-    boost::dynamic_bitset<size_t> output(o.size());
-    for (size_t i = 0U; i < o.size(); ++i) {
-        output[i] = o[i];
-    }
-    output >>= 1U;
-
-    return output;
-}
-
-template <typename BigInteger>
-std::vector<boost::dynamic_bitset<size_t>> wheel_gen(const std::vector<BigInteger>& primes, BigInteger limit) {
-    std::vector<boost::dynamic_bitset<size_t>> output;
-    std::vector<BigInteger> wheelPrimes;
-    for (const BigInteger& p : primes) {
-        wheelPrimes.push_back(p);
-        if (wheelPrimes.back() > 3U) {
-            output.push_back(wheel_inc(wheelPrimes, limit));
-        }
-    }
-    return output;
-}
-
-inline size_t GetWheelIncrement(std::vector<boost::dynamic_bitset<size_t>>& inc_seqs) {
-    size_t wheelIncrement = 0U;
-    bool is_wheel_multiple = false;
-    do {
-        for (size_t i = 0; i < inc_seqs.size(); ++i) {
-            boost::dynamic_bitset<size_t>& wheel = inc_seqs[i];
-            is_wheel_multiple = wheel.test(0U);
-            wheel >>= 1U;
-            if (is_wheel_multiple) {
-                wheel[wheel.size() - 1U] = true;
-                break;
-            }
-        }
-        wheelIncrement++;
-    } while (is_wheel_multiple);
-
-    return wheelIncrement;
-}
-
 inline size_t GetWheel5Increment(uint32_t& wheel5) {
     size_t wheelIncrement = 0U;
     bool is_wheel_multiple = false;
@@ -209,7 +98,5 @@ inline BigInteger makeNotMultiple(BigInteger n) {
     return n;
 }
 
-std::vector<BigInteger> TrialDivision(const BigInteger& n);
 std::vector<BigInteger> SieveOfEratosthenes(const BigInteger& n);
-std::vector<BigInteger> SegmentedSieveOfEratosthenes(const BigInteger& n, const size_t& limit);
 } // namespace qimcifa
