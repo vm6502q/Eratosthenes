@@ -267,5 +267,5 @@ using namespace qimcifa;
 PYBIND11_MODULE(eratosthenes, m) {
     m.doc() = "pybind11 plugin to generate prime numbers";
     m.def("sieve", &SieveOfEratosthenes, "Returns all primes up to the value of its argument (using Sieve of Eratosthenes)");
-    m.def("count", &CountPrimesTo, "Count the prime numbers between 1 and the value of its argument");
+    m.def("count", &CountPrimesTo, "Counts the prime numbers between 1 and the value of its argument");
 }
