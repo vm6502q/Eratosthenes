@@ -111,10 +111,8 @@ std::vector<BigInteger> SieveOfEratosthenes(const BigInteger& n)
                     const size_t q = (size_t)backward5(i);
                     const size_t w = q / bitsPerWord;
                     const uint64_t b = 1ULL << (q % bitsPerWord);
-                    if (true) {
-                        std::lock_guard<std::mutex> lock(notPrimeMutex[w]);
-                        notPrime[w] |= b;
-                    }
+                    std::lock_guard<std::mutex> lock(notPrimeMutex[w]);
+                    notPrime[w] |= b;
                 }
                 i += p4;
                 if (i > n) {
@@ -125,10 +123,8 @@ std::vector<BigInteger> SieveOfEratosthenes(const BigInteger& n)
                     const size_t q = (size_t)backward5(i);
                     const size_t w = q / bitsPerWord;
                     const uint64_t b = 1ULL << (q % bitsPerWord);
-                    if (true) {
-                        std::lock_guard<std::mutex> lock(notPrimeMutex[w]);
-                        notPrime[w] |= b;
-                    }
+                    std::lock_guard<std::mutex> lock(notPrimeMutex[w]);
+                    notPrime[w] |= b;
                 }
                 i += p2;
                 if (i > n) {
