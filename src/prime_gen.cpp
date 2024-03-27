@@ -45,7 +45,7 @@ std::vector<BigInteger> SieveOfEratosthenes(const BigInteger& n)
     size_t bitsPerWord = 64U;
     const size_t arrayWidth = (cardinality + bitsPerWord) / bitsPerWord;
     std::unique_ptr<uint64_t> uNotPrime(new uint64_t[arrayWidth]);
-    std::unique_ptr<std::mutex> uNotPrimeMutex(new std::mutex[(cardinality + bitsPerWord) / bitsPerWord]);
+    std::unique_ptr<std::mutex> uNotPrimeMutex(new std::mutex[arrayWidth]);
     uint64_t* notPrime = uNotPrime.get();
     std::mutex* notPrimeMutex = uNotPrimeMutex.get();
 
