@@ -20,12 +20,12 @@
 namespace qimcifa {
 std::vector<BigInteger> SieveOfEratosthenes(const BigInteger& n)
 {
-    std::vector<BigInteger> knownPrimes = { 2, 3, 5, 7 };
-    if (n < 2) {
+    std::vector<BigInteger> knownPrimes = { 2U, 3U, 5U, 7U };
+    if (n < 2U) {
         return std::vector<BigInteger>();
     }
 
-    if (n < (knownPrimes.back() + 2)) {
+    if (n < (knownPrimes.back() + 2U)) {
         const auto highestPrimeIt = std::upper_bound(knownPrimes.begin(), knownPrimes.end(), n);
         return std::vector<BigInteger>(knownPrimes.begin(), highestPrimeIt);
     }
@@ -146,14 +146,14 @@ std::vector<BigInteger> SieveOfEratosthenes(const BigInteger& n)
 
 BigInteger CountPrimesTo(const BigInteger& n)
 {
-    const std::vector<BigInteger> knownPrimes = { 2, 3, 5, 7 };
-    if (n < 2) {
+    constexpr BigInteger knownPrimes[4U] = { 2U, 3U, 5U, 7U };
+    if (n < 2U) {
         return 0U;
     }
 
-    if (n < (knownPrimes.back() + 2)) {
-        const auto highestPrimeIt = std::upper_bound(knownPrimes.begin(), knownPrimes.end(), n);
-        return std::distance(knownPrimes.begin(), highestPrimeIt);
+    if (n < 11U) {
+        const auto highestPrimeIt = std::upper_bound(knownPrimes, knownPrimes + 4U, n);
+        return std::distance(knownPrimes, highestPrimeIt);
     }
 
     // We are excluding multiples of the first few
