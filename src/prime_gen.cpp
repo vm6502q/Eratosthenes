@@ -35,7 +35,7 @@ std::vector<BigInteger> SieveOfEratosthenes(const BigInteger& n)
     // We are excluding multiples of the first few
     // small primes from outset. For multiples of
     // 2, 3, and 5 this reduces complexity to 4/15.
-    const size_t cardinality = backward7(n);
+    const size_t cardinality = backward5(n);
 
     // Create a boolean array "prime[0..cardinality]"
     // and initialize all entries it as true. Rather,
@@ -68,7 +68,7 @@ std::vector<BigInteger> SieveOfEratosthenes(const BigInteger& n)
             threadBoundary *= threadBoundary;
         }
 
-        if (notPrime[backward7(p)]) {
+        if (notPrime[backward5(p)]) {
             continue;
         }
 
@@ -89,7 +89,7 @@ std::vector<BigInteger> SieveOfEratosthenes(const BigInteger& n)
             // we can proceed with the 1 remainder loop.
             // This saves 2/3 of updates (or modulo).
             if ((p % 3U) == 2U) {
-                notPrime[backward7(i)] = true;
+                notPrime[backward5(i)] = true;
                 i += p2;
                 if (i > n) {
                     return false;
@@ -97,16 +97,16 @@ std::vector<BigInteger> SieveOfEratosthenes(const BigInteger& n)
             }
 
             for (;;) {
-                if ((i % 5U) && (i % 7U)) {
-                    notPrime[backward7(i)] = true;
+                if (i % 5U) {
+                    notPrime[backward5(i)] = true;
                 }
                 i += p4;
                 if (i > n) {
                     return false;
                 }
 
-                if ((i % 5U) && (i % 7U)) {
-                    notPrime[backward7(i)] = true;
+                if (i % 5U) {
+                    notPrime[backward5(i)] = true;
                 }
                 i += p2;
                 if (i > n) {
@@ -128,7 +128,7 @@ std::vector<BigInteger> SieveOfEratosthenes(const BigInteger& n)
 
         o += GetWheel5and7Increment(wheel5, wheel7);
 
-        if (notPrime[backward7(p)]) {
+        if (notPrime[backward5(p)]) {
             continue;
         }
 
@@ -159,7 +159,7 @@ BigInteger CountPrimesTo(const BigInteger& n)
     // We are excluding multiples of the first few
     // small primes from outset. For multiples of
     // 2, 3, and 5 this reduces complexity to 4/15.
-    const size_t cardinality = backward7(n);
+    const size_t cardinality = backward5(n);
 
     // Create a boolean array "prime[0..cardinality]"
     // and initialize all entries it as true. Rather,
@@ -193,7 +193,7 @@ BigInteger CountPrimesTo(const BigInteger& n)
             threadBoundary *= threadBoundary;
         }
 
-        if (notPrime[backward7(p)]) {
+        if (notPrime[backward5(p)]) {
             continue;
         }
 
@@ -214,7 +214,7 @@ BigInteger CountPrimesTo(const BigInteger& n)
             // we can proceed with the 1 remainder loop.
             // This saves 2/3 of updates (or modulo).
             if ((p % 3U) == 2U) {
-                notPrime[backward7(i)] = true;
+                notPrime[backward5(i)] = true;
                 i += p2;
                 if (i > n) {
                     return false;
@@ -222,16 +222,16 @@ BigInteger CountPrimesTo(const BigInteger& n)
             }
 
             for (;;) {
-                if ((i % 5U) && (i % 7U)) {
-                    notPrime[backward7(i)] = true;
+                if (i % 5U) {
+                    notPrime[backward5(i)] = true;
                 }
                 i += p4;
                 if (i > n) {
                     return false;
                 }
 
-                if ((i % 5U) && (i % 7U)) {
-                    notPrime[backward7(i)] = true;
+                if (i % 5U) {
+                    notPrime[backward5(i)] = true;
                 }
                 i += p2;
                 if (i > n) {
@@ -253,7 +253,7 @@ BigInteger CountPrimesTo(const BigInteger& n)
 
         o += GetWheel5and7Increment(wheel5, wheel7);
 
-        if (notPrime[backward7(p)]) {
+        if (notPrime[backward5(p)]) {
             continue;
         }
 
