@@ -42,7 +42,7 @@ inline size_t backward(const BigInteger& n) {
     return ((~((~n) | 1U)) / 3U) + 1U;
 }
 
-inline size_t backward5(BigInteger n) {
+inline size_t backward5(const BigInteger& n) {
     return (((((n + 1U) << 2U) / 5U + 1U) << 1U) / 3U + 1U) >> 1U;
 }
 
