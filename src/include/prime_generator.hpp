@@ -33,28 +33,27 @@ typedef boost::multiprecision::number<boost::multiprecision::cpp_int_backend<BIG
     BigInteger;
 #endif
 
-inline BigInteger backward(const BigInteger& n) {
-    return ((~((~n) | 1U)) / 3U) + 1U;
-}
-
-inline BigInteger forward(const BigInteger& p) {
+inline BigInteger forward(const size_t& p) {
     // Make this NOT a multiple of 2 or 3.
     return (p << 1U) + (~(~p | 1U)) - 1U;
 }
 
-inline BigInteger backward5(BigInteger n) {
+inline size_t backward(const BigInteger& n) {
+    return ((~((~n) | 1U)) / 3U) + 1U;
+}
+
+inline size_t backward5(BigInteger n) {
     n = ((n + 1U) << 2U) / 5U;
     n = ((n + 1U) << 1U) / 3U;
     return (n + 1U) >> 1U;
 }
 
-inline BigInteger backward7(BigInteger n) {
+inline size_t backward7(const BigInteger& n) {
     constexpr int m[48U] = {
         1, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 121,
         127, 131, 137, 139, 143, 149, 151, 157, 163, 167, 169, 173, 179, 181, 187, 191, 193, 197, 199, 209
     };
-    const auto p = std::lower_bound(m, m + 48U, n % 210U);
-    return std::distance(m, p) + 48U * (n / 210U) + 1U;
+    return std::distance(m, std::lower_bound(m, m + 48U, n % 210U)) + 48U * (n / 210U) + 1U;
 }
 
 inline size_t GetWheel5and7Increment(uint32_t& wheel5, uint64_t& wheel7) {
