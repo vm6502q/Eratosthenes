@@ -54,7 +54,7 @@ inline size_t backward7(const BigInteger& n) {
     return std::distance(m, std::lower_bound(m, m + 48U, n % 210U)) + 48U * (n / 210U) + 1U;
 }
 
-inline size_t GetWheel5and7Increment(short& wheel5, uint64_t& wheel7) {
+inline size_t GetWheel5and7Increment(unsigned short& wheel5, unsigned long long& wheel7) {
     unsigned wheelIncrement = 0U;
     bool is_wheel_multiple = false;
     do {
@@ -74,7 +74,7 @@ inline size_t GetWheel5and7Increment(short& wheel5, uint64_t& wheel7) {
         ++wheelIncrement;
     } while (is_wheel_multiple);
 
-    return wheelIncrement;
+    return (size_t)wheelIncrement;
 }
 
 std::vector<BigInteger> SieveOfEratosthenes(const BigInteger& n);
