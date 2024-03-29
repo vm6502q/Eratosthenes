@@ -47,22 +47,22 @@ inline size_t backward5(const BigInteger& n) {
 }
 
 inline size_t backward7(const BigInteger& n) {
-    constexpr int m[48U] = {
+    constexpr unsigned m[48U] = {
         1, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 121,
         127, 131, 137, 139, 143, 149, 151, 157, 163, 167, 169, 173, 179, 181, 187, 191, 193, 197, 199, 209
     };
     return std::distance(m, std::lower_bound(m, m + 48U, n % 210U)) + 48U * (n / 210U) + 1U;
 }
 
-inline size_t GetWheel5and7Increment(uint32_t& wheel5, uint64_t& wheel7) {
-    size_t wheelIncrement = 0U;
+inline size_t GetWheel5and7Increment(short& wheel5, uint64_t& wheel7) {
+    unsigned wheelIncrement = 0U;
     bool is_wheel_multiple = false;
     do {
         is_wheel_multiple = (bool)(wheel5 & 1U);
         wheel5 >>= 1U;
         if (is_wheel_multiple) {
             wheel5 |= 1U << 9U;
-            wheelIncrement++;
+            ++wheelIncrement;
             continue;
         }
 
@@ -71,7 +71,7 @@ inline size_t GetWheel5and7Increment(uint32_t& wheel5, uint64_t& wheel7) {
         if (is_wheel_multiple) {
             wheel7 |= 1ULL << 55U;
         }
-        wheelIncrement++;
+        ++wheelIncrement;
     } while (is_wheel_multiple);
 
     return wheelIncrement;

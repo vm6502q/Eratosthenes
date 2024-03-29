@@ -52,7 +52,7 @@ std::vector<BigInteger> SieveOfEratosthenes(const BigInteger& n)
     BigInteger threadBoundary = 36U;
 
     // Get the remaining prime numbers.
-    uint32_t wheel5 = 129U;
+    short wheel5 = 129U;
     uint64_t wheel7 = 9009416540524545ULL;
     size_t o = 1U;
     for (;;) {
@@ -176,7 +176,7 @@ BigInteger CountPrimesTo(const BigInteger& n)
     BigInteger threadBoundary = 36U;
 
     // Get the remaining prime numbers.
-    uint32_t wheel5 = 129U;
+    short wheel5 = 129U;
     uint64_t wheel7 = 9009416540524545ULL;
     size_t o = 1U;
     BigInteger count = 4U;
