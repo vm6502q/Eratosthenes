@@ -115,6 +115,18 @@ inline size_t GetWheel5and7Increment(unsigned short& wheel5, unsigned long long&
     return (size_t)wheelIncrement;
 }
 
-std::vector<BigInteger> SieveOfEratosthenes(const BigInteger& n);
+inline BigInteger makeNotSpaceMultiple(BigInteger n) {
+    if ((n & 1U) == 0U) {
+        --n;
+    }
+    while (((n % 3U) == 0U) || ((n % 5U) == 0U)) {
+        n -= 2U;
+    }
+
+    return n;
+}
+
 BigInteger CountPrimesTo(const BigInteger& n);
+std::vector<BigInteger> SieveOfEratosthenes(const BigInteger& n);
+std::vector<BigInteger> SegmentedSieveOfEratosthenes(BigInteger n, size_t limit);
 } // namespace qimcifa

@@ -263,16 +263,21 @@ BigInteger CountPrimesTo(const BigInteger& n)
     return count;
 }
 
-std::vector<BigInteger> SegmentedSieveOfEratosthenes(BigInteger n)
+std::vector<BigInteger> SegmentedSieveOfEratosthenes(BigInteger n, size_t limit)
 {
-    // Compute all primes smaller than or equal
-    // to square root of n using simple sieve
-    size_t limit = sqrt(n) + 1U;
-    if ((limit & 1U) == 0U) {
-        limit -= 1U;
+    // TODO: This should scale to the system.
+    // Assume we can safely fit 128 KB in L1 cache.
+    // The simple sieve removes multiples of 2, 3, and 5.
+    // limit = 128 KB = 131072 B,
+    // limit = ((((limit * 2) * 3) / 2) * 5) / 4
+    if (limit == 0U) {
+        return std::vector<BigInteger>();
+    }
+    n = makeNotSpaceMultiple(n);
+    if ((n < 491520ULL) || (limit >= n)) {
+        return SieveOfEratosthenes(n);
     }
     std::vector<BigInteger> knownPrimes = SieveOfEratosthenes(limit);
-    const size_t sqrtPrimeSize = knownPrimes.size();
     knownPrimes.reserve(std::expint(log(n)) - std::expint(log(2)));
     limit = backward2(limit);
 
@@ -299,8 +304,11 @@ std::vector<BigInteger> SegmentedSieveOfEratosthenes(BigInteger n)
 
         // Use the found primes by simpleSieve() to find
         // primes in current range
-        for (size_t i = 1U; i < sqrtPrimeSize; ++i) {
+        for (size_t i = 1U; ; ++i) {
             const BigInteger& p = knownPrimes[i];
+            if ((p * p) > forward(high)) {
+                break;
+            }
             dispatch.dispatch([&fLo, &low, &cardinality, p, &notPrime]() {
                 // We are skipping multiples of 2.
                 const BigInteger p2 = p << 1U;
