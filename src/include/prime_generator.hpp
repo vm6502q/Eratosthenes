@@ -128,5 +128,5 @@ inline BigInteger makeNotSpaceMultiple(BigInteger n) {
 
 BigInteger CountPrimesTo(const BigInteger& n);
 std::vector<BigInteger> SieveOfEratosthenes(const BigInteger& n);
-std::vector<BigInteger> SegmentedSieveOfEratosthenes(BigInteger n, size_t limit);
+std::vector<BigInteger> SegmentedSieveOfEratosthenes(BigInteger n);
 } // namespace qimcifa
