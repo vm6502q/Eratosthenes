@@ -91,13 +91,15 @@ inline size_t backward7(const BigInteger& n) {
 }
 
 inline size_t GetWheel5and7Increment(unsigned short& wheel5, unsigned long long& wheel7) {
+    constexpr unsigned short wheel5Back = 1U << 9U;
+    constexpr unsigned long long wheel7Back = 1ULL << 55U;
     unsigned wheelIncrement = 0U;
     bool is_wheel_multiple = false;
     do {
         is_wheel_multiple = (bool)(wheel5 & 1U);
         wheel5 >>= 1U;
         if (is_wheel_multiple) {
-            wheel5 |= 1U << 9U;
+            wheel5 |= wheel5Back;
             ++wheelIncrement;
             continue;
         }
@@ -105,7 +107,7 @@ inline size_t GetWheel5and7Increment(unsigned short& wheel5, unsigned long long&
         is_wheel_multiple = (bool)(wheel7 & 1U);
         wheel7 >>= 1U;
         if (is_wheel_multiple) {
-            wheel7 |= 1ULL << 55U;
+            wheel7 |= wheel7Back;
         }
         ++wheelIncrement;
     } while (is_wheel_multiple);
