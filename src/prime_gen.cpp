@@ -285,7 +285,6 @@ std::vector<BigInteger> SegmentedSieveOfEratosthenes(BigInteger n)
     const BigInteger sqrtnp1 = sqrt(n) + 1U;
     std::vector<BigInteger> knownPrimes = SieveOfEratosthenes(limit_simple);
     knownPrimes.reserve(std::expint(log(sqrtnp1)) - std::expint(log(2)));
-    size_t count = knownPrimes.size();
 
     // Divide the range [0..n-1] in different segments
     // We have chosen segment size as sqrt(n).
