@@ -4,7 +4,7 @@ Fast prime generation for Python based on Sieve of Eratosthenes
 ## Usage
 
 ```python
-from eratosthenes import sieve, count, segmented_sieve
+from eratosthenes import sieve, count, segmented_sieve, segmented_count
 
 # This is a Sieve of Eratosthenes with wheel factorization.
 primes = sieve(1000)
@@ -12,9 +12,9 @@ primes = sieve(1000)
 # This uses the same logic to count primes up the argument.
 num_primes = count(1000)
 
-# This segmented sieve only uses up to the number of bytes
-# of memory that you specify for the second argument.
-primes = segmented_sieve(1000, 32)
+# This segmented sieve only uses up to 128 KB main memory
+primes = segmented_sieve(1000)
+num_primes = segmented_count(1000)
 ```
 
 ## About

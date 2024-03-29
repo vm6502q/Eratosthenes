@@ -263,29 +263,34 @@ BigInteger CountPrimesTo(const BigInteger& n)
     return count;
 }
 
-std::vector<BigInteger> SegmentedSieveOfEratosthenes(BigInteger n, size_t limit)
+std::vector<BigInteger> SegmentedSieveOfEratosthenes(BigInteger n)
 {
     // TODO: This should scale to the system.
-    // Assume we can safely fit 128 KB in L1 cache.
+    // Assume the L1 cache limit is 128 KB.
+    // We save half our necessary bytes by
+    // removing multiples of 2.
     // The simple sieve removes multiples of 2, 3, and 5.
     // limit = 128 KB = 131072 B,
-    // limit = ((((limit * 2) * 3) / 2) * 5) / 4
-    if (limit == 0U) {
-        return std::vector<BigInteger>();
+    // limit_segmented = limit * 2
+    // limit_simple = ((((limit * 2) * 3) / 2) * 5) / 4
+    constexpr size_t limit = 262144ULL;
+    constexpr size_t limit_simple = 1966080ULL;
+
+    if (!(n & 1U)) {
+        --n;
     }
-    n = makeNotSpaceMultiple(n);
-    if ((n < 491520ULL) || (limit >= n)) {
+    if ((n < 491520ULL) || (limit_simple >= n)) {
         return SieveOfEratosthenes(n);
     }
-    std::vector<BigInteger> knownPrimes = SieveOfEratosthenes(limit);
-    knownPrimes.reserve(std::expint(log(n)) - std::expint(log(2)));
-    limit = backward2(limit);
+    const BigInteger sqrtnp1 = sqrt(n) + 1U;
+    std::vector<BigInteger> knownPrimes = SieveOfEratosthenes(limit_simple);
+    knownPrimes.reserve(std::expint(log(sqrtnp1)) - std::expint(log(2)));
 
     // Divide the range [0..n-1] in different segments
     // We have chosen segment size as sqrt(n).
     const size_t nCardinality = backward2(n);
-    size_t low = limit;
-    size_t high = limit << 1U;
+    size_t low = backward2(limit_simple);
+    size_t high = backward2(limit_simple) + limit;
 
     // Process one segment at a time till we pass n.
     while (low < nCardinality)
@@ -353,6 +358,110 @@ std::vector<BigInteger> SegmentedSieveOfEratosthenes(BigInteger n, size_t limit)
 
     return knownPrimes;
 }
+
+BigInteger SegmentedCountPrimesTo(BigInteger n)
+{
+    // TODO: This should scale to the system.
+    // Assume the L1 cache limit is 128 KB.
+    // We save half our necessary bytes by
+    // removing multiples of 2.
+    // The simple sieve removes multiples of 2, 3, and 5.
+    // limit = 128 KB = 131072 B,
+    // limit_segmented = limit * 2
+    // limit_simple = ((((limit * 2) * 3) / 2) * 5) / 4
+    constexpr size_t limit = 262144ULL;
+    constexpr size_t limit_simple = 1966080ULL;
+
+    if (!(n & 1U)) {
+        --n;
+    }
+    if ((n < 491520ULL) || (limit_simple >= n)) {
+        return CountPrimesTo(n);
+    }
+    const BigInteger sqrtnp1 = sqrt(n) + 1U;
+    std::vector<BigInteger> knownPrimes = SieveOfEratosthenes(limit_simple);
+    knownPrimes.reserve(std::expint(log(sqrtnp1)) - std::expint(log(2)));
+    size_t count = knownPrimes.size();
+
+    // Divide the range [0..n-1] in different segments
+    // We have chosen segment size as sqrt(n).
+    const size_t nCardinality = backward2(n);
+    size_t low = backward2(limit_simple);
+    size_t high = backward2(limit_simple) + limit;
+
+    // Process one segment at a time till we pass n.
+    while (low < nCardinality)
+    {
+        if (high > nCardinality) {
+           high = nCardinality;
+        }
+        const BigInteger fLo = forward2(low);
+
+        // To mark primes in current range. A value in mark[i]
+        // will finally be false if 'i-low' is Not a prime,
+        // else true.
+        const size_t cardinality = high - low;
+        std::unique_ptr<bool> uNotPrime(new bool[cardinality + 1U]());
+        bool* notPrime = uNotPrime.get();
+
+        // Use the found primes by simpleSieve() to find
+        // primes in current range
+        for (size_t i = 1U; ; ++i) {
+            if (i > knownPrimes.size()) {
+                break;
+            }
+            const BigInteger& p = knownPrimes[i];
+            if ((p * p) > forward(high)) {
+                break;
+            }
+            dispatch.dispatch([&fLo, &low, &cardinality, p, &notPrime]() {
+                // We are skipping multiples of 2.
+                const BigInteger p2 = p << 1U;
+
+                // Find the minimum number in [low..high] that is
+                // a multiple of prime[i] (divisible by prime[i])
+                // For example, if low is 31 and prime[i] is 3,
+                // we start with 33.
+                BigInteger i = (fLo / p) * p;
+                if (i < fLo) {
+                    i += p;
+                }
+                if ((i & 1U) == 0U) {
+                    i += p;
+                }
+
+                for (;;) {
+                    const size_t o = backward2(i) - low;
+                    if (o > cardinality) {
+                        return false;
+                    }
+                    notPrime[o] = true;
+                    i += p2;
+                }
+
+                return false;
+            });
+        }
+        dispatch.finish();
+
+        // Numbers which are not marked are prime
+        for (size_t o = 1U; o <= cardinality; ++o) {
+            if (!notPrime[o]) {
+                const BigInteger p = forward2(o + low);
+                if (p <= sqrtnp1) {
+                    knownPrimes.push_back(p);
+                }
+                ++count;
+            }
+        }
+
+        // Update low and high for next segment
+        low = low + limit;
+        high = high + limit;
+    }
+
+    return count;
+}
 } // namespace qimcifa
 
 using namespace qimcifa;
@@ -360,6 +469,7 @@ using namespace qimcifa;
 PYBIND11_MODULE(eratosthenes, m) {
     m.doc() = "pybind11 plugin to generate prime numbers";
     m.def("count", &CountPrimesTo, "Counts the prime numbers between 1 and the value of its argument");
+    m.def("segmented_count", &SegmentedCountPrimesTo, "Counts the primes in capped space complexity");
     m.def("sieve", &SieveOfEratosthenes, "Returns all primes up to the value of its argument (using Sieve of Eratosthenes)");
-    m.def("segmented_sieve", &SegmentedSieveOfEratosthenes, "Returns primes in sqrt() space complexity (relative Sieve of Eratosthenes)");
+    m.def("segmented_sieve", &SegmentedSieveOfEratosthenes, "Returns the primes in capped space complexity");
 }
