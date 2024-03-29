@@ -63,14 +63,13 @@ std::vector<BigInteger> SieveOfEratosthenes(const BigInteger& n)
             break;
         }
 
-        if (notPrime[backward5(p)]) {
-            continue;
-        }
-
         if (threadBoundary < p) {
             dispatch.finish();
-            threadBoundary = (p - 1U);
             threadBoundary *= threadBoundary;
+        }
+
+        if (notPrime[backward5(p)]) {
+            continue;
         }
 
         knownPrimes.push_back(p);
@@ -189,14 +188,13 @@ BigInteger CountPrimesTo(const BigInteger& n)
             break;
         }
 
-        if (notPrime[backward5(p)]) {
-            continue;
-        }
-
         if (threadBoundary < p) {
             dispatch.finish();
-            threadBoundary = (p - 1U);
             threadBoundary *= threadBoundary;
+        }
+
+        if (notPrime[backward5(p)]) {
+            continue;
         }
 
         ++count;
