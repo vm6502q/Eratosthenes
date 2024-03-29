@@ -33,9 +33,44 @@ typedef boost::multiprecision::number<boost::multiprecision::cpp_int_backend<BIG
     BigInteger;
 #endif
 
+inline BigInteger sqrt(const BigInteger& toTest)
+{
+    // Otherwise, find b = sqrt(b^2).
+    BigInteger start = 1U, end = toTest >> 1U, ans = 0U;
+    do {
+        const BigInteger mid = (start + end) >> 1U;
+
+        // If toTest is a perfect square
+        const BigInteger sqr = mid * mid;
+        if (sqr == toTest) {
+            return mid;
+        }
+
+        if (sqr < toTest) {
+            // Since we need floor, we update answer when mid*mid is smaller than p, and move closer to sqrt(p).
+            start = mid + 1U;
+            ans = mid;
+        } else {
+            // If mid*mid is greater than p
+            end = mid - 1U;
+        }
+    } while (start <= end);
+
+    return ans;
+}
+
+inline BigInteger forward2(const size_t& p) {
+    // Make this NOT a multiple of 2.
+    return (p << 1U) - 1U;
+}
+
 inline BigInteger forward(const size_t& p) {
     // Make this NOT a multiple of 2 or 3.
     return (p << 1U) + (~(~p | 1U)) - 1U;
+}
+
+inline size_t backward2(const BigInteger& p) {
+    return (p + 1U) >> 1U;
 }
 
 inline size_t backward(const BigInteger& n) {

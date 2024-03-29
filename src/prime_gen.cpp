@@ -262,12 +262,102 @@ BigInteger CountPrimesTo(const BigInteger& n)
 
     return count;
 }
+
+std::vector<BigInteger> SegmentedSieveOfEratosthenes(BigInteger n)
+{
+    // Compute all primes smaller than or equal
+    // to square root of n using simple sieve
+    size_t limit = (sqrt(n) + 1U) | 1U;
+    std::vector<BigInteger> knownPrimes = SieveOfEratosthenes(limit);
+    const size_t sqrtPrimeSize = knownPrimes.size();
+    knownPrimes.reserve(std::expint(log(n)) - std::expint(log(2)));
+    limit = backward2(limit);
+
+    // Divide the range [0..n-1] in different segments
+    // We have chosen segment size as sqrt(n).
+    const size_t nCardinality = backward2(n);
+    size_t low = limit;
+    size_t high = limit << 1U;
+
+    // Process one segment at a time till we pass n.
+    while (low < nCardinality)
+    {
+        if (high > nCardinality) {
+           high = nCardinality;
+        }
+        const BigInteger fLo = forward2(low);
+
+        // To mark primes in current range. A value in mark[i]
+        // will finally be false if 'i-low' is Not a prime,
+        // else true.
+        const size_t cardinality = high - low;
+        std::unique_ptr<bool> uNotPrime(new bool[cardinality + 1U]());
+        bool* notPrime = uNotPrime.get();
+
+        // Use the found primes by simpleSieve() to find
+        // primes in current range
+        for (size_t i = 1U; i < sqrtPrimeSize; ++i) {
+            const BigInteger& p = knownPrimes[i];
+            dispatch.dispatch([&fLo, &low, &cardinality, p, &notPrime]() {
+                // We are skipping multiples of 2, 3, and 5
+                // for space complexity, for 4/15 the bits.
+                // More are skipped by the wheel for time.
+                const BigInteger p2 = p << 1U;
+                // const BigInteger p4 = p << 2U;
+
+                // Find the minimum number in [low..high] that is
+                // a multiple of prime[i] (divisible by prime[i])
+                // For example, if low is 31 and prime[i] is 3,
+                // we start with 33.
+                BigInteger i = (fLo / p) * p;
+                if (i < fLo) {
+                    i += p;
+                }
+                if ((i & 1U) == 0U) {
+                    i += p;
+                }
+
+                // "p" already definitely not a multiple of 3.
+                // Its remainder when divided by 3 can be 1 or 2.
+                // If it is 2, we can do a "half iteration" of the
+                // loop that would handle remainder of 1, and then
+                // we can proceed with the 1 remainder loop.
+                // This saves 2/3 of updates (or modulo).
+                for (;;) {
+                    const size_t o = backward2(i) - low;
+                    if (o > cardinality) {
+                        return false;
+                    }
+                    notPrime[o] = true;
+                    i += p2;
+                }
+
+                return false;
+            });
+        }
+        dispatch.finish();
+
+        // Numbers which are not marked are prime
+        for (size_t o = 1U; o <= cardinality; ++o) {
+            if (!notPrime[o]) {
+                knownPrimes.push_back(forward2(o + low));
+            }
+        }
+
+        // Update low and high for next segment
+        low = low + limit;
+        high = high + limit;
+    }
+
+    return knownPrimes;
+}
 } // namespace qimcifa
 
 using namespace qimcifa;
 
 PYBIND11_MODULE(eratosthenes, m) {
     m.doc() = "pybind11 plugin to generate prime numbers";
-    m.def("sieve", &SieveOfEratosthenes, "Returns all primes up to the value of its argument (using Sieve of Eratosthenes)");
     m.def("count", &CountPrimesTo, "Counts the prime numbers between 1 and the value of its argument");
+    m.def("sieve", &SieveOfEratosthenes, "Returns all primes up to the value of its argument (using Sieve of Eratosthenes)");
+    m.def("segmented_sieve", &SegmentedSieveOfEratosthenes, "Returns primes in sqrt() space complexity (relative Sieve of Eratosthenes)");
 }
