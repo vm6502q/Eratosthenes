@@ -267,7 +267,10 @@ std::vector<BigInteger> SegmentedSieveOfEratosthenes(BigInteger n)
 {
     // Compute all primes smaller than or equal
     // to square root of n using simple sieve
-    size_t limit = (sqrt(n) + 1U) | 1U;
+    size_t limit = sqrt(n) + 1U;
+    if ((limit & 1U) == 0U) {
+        limit -= 1U;
+    }
     std::vector<BigInteger> knownPrimes = SieveOfEratosthenes(limit);
     const size_t sqrtPrimeSize = knownPrimes.size();
     knownPrimes.reserve(std::expint(log(n)) - std::expint(log(2)));
@@ -299,11 +302,8 @@ std::vector<BigInteger> SegmentedSieveOfEratosthenes(BigInteger n)
         for (size_t i = 1U; i < sqrtPrimeSize; ++i) {
             const BigInteger& p = knownPrimes[i];
             dispatch.dispatch([&fLo, &low, &cardinality, p, &notPrime]() {
-                // We are skipping multiples of 2, 3, and 5
-                // for space complexity, for 4/15 the bits.
-                // More are skipped by the wheel for time.
+                // We are skipping multiples of 2.
                 const BigInteger p2 = p << 1U;
-                // const BigInteger p4 = p << 2U;
 
                 // Find the minimum number in [low..high] that is
                 // a multiple of prime[i] (divisible by prime[i])
@@ -317,12 +317,6 @@ std::vector<BigInteger> SegmentedSieveOfEratosthenes(BigInteger n)
                     i += p;
                 }
 
-                // "p" already definitely not a multiple of 3.
-                // Its remainder when divided by 3 can be 1 or 2.
-                // If it is 2, we can do a "half iteration" of the
-                // loop that would handle remainder of 1, and then
-                // we can proceed with the 1 remainder loop.
-                // This saves 2/3 of updates (or modulo).
                 for (;;) {
                     const size_t o = backward2(i) - low;
                     if (o > cardinality) {
