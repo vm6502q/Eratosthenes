@@ -11,6 +11,7 @@
 // be entirely skipped in loop enumeration.
 
 #include "prime_generator.hpp"
+#include "dispatchqueue.hpp"
 
 #include <cmath>
 
@@ -18,6 +19,8 @@
 #include <pybind11/stl.h>
 
 namespace qimcifa {
+DispatchQueue dispatch(std::thread::hardware_concurrency());
+
 std::vector<BigInteger> SieveOfEratosthenes(const BigInteger& n)
 {
     std::vector<BigInteger> knownPrimes = { 2U, 3U, 5U, 7U };
@@ -298,22 +301,18 @@ std::vector<BigInteger> SegmentedSieveOfEratosthenes(BigInteger n)
         if (high > nCardinality) {
            high = nCardinality;
         }
-        const BigInteger fLo = forward2(low);
-        const BigInteger fHi = forward2(high);
 
-        // To mark primes in current range. A value in mark[i]
-        // will finally be false if 'i-low' is Not a prime,
-        // else true.
+        const BigInteger fLo = forward2(low);
+        const size_t sqrtIndex = std::distance(
+            knownPrimes.begin(),
+            std::upper_bound(knownPrimes.begin(), knownPrimes.end(), sqrt(forward2(high)) + 1U)
+        );
+
         const size_t cardinality = high - low;
         bool notPrime[cardinality + 1U] = { false };
 
-        // Use the found primes by simpleSieve() to find
-        // primes in current range
-        for (size_t i = 1U; i < knownPrimes.size(); ++i) {
+        for (size_t i = 1U; i < sqrtIndex; ++i) {
             const BigInteger& p = knownPrimes[i];
-            if ((p * p) > fHi) {
-                break;
-            }
             dispatch.dispatch([&fLo, &low, &cardinality, p, &notPrime]() {
                 // We are skipping multiples of 2.
                 const BigInteger p2 = p << 1U;
@@ -397,7 +396,10 @@ BigInteger SegmentedCountPrimesTo(BigInteger n)
            high = nCardinality;
         }
         const BigInteger fLo = forward2(low);
-        const BigInteger fHi = forward2(high);
+        const size_t sqrtIndex = std::distance(
+            knownPrimes.begin(),
+            std::upper_bound(knownPrimes.begin(), knownPrimes.end(), sqrt(forward2(high)) + 1U)
+        );
 
         // To mark primes in current range. A value in mark[i]
         // will finally be false if 'i-low' is Not a prime,
@@ -407,11 +409,8 @@ BigInteger SegmentedCountPrimesTo(BigInteger n)
 
         // Use the found primes by simpleSieve() to find
         // primes in current range
-        for (size_t i = 1U; i < knownPrimes.size(); ++i) {
+        for (size_t i = 1U; i < sqrtIndex; ++i) {
             const BigInteger& p = knownPrimes[i];
-            if ((p * p) > fHi) {
-                break;
-            }
             dispatch.dispatch([&fLo, &low, &cardinality, p, &notPrime]() {
                 // We are skipping multiples of 2.
                 const BigInteger p2 = p << 1U;

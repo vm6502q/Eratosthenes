@@ -12,16 +12,14 @@
 
 #include "config.h"
 
+#include <cstdint>
 #include <vector>
 
 #if BIG_INT_BITS > 64
 #include <boost/multiprecision/cpp_int.hpp>
 #endif
 
-#include "dispatchqueue.hpp"
-
 namespace qimcifa {
-DispatchQueue dispatch(std::thread::hardware_concurrency());
 
 #if BIG_INT_BITS < 33
 typedef uint32_t BigInteger;
