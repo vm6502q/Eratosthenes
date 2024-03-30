@@ -269,15 +269,15 @@ BigInteger CountPrimesTo(const BigInteger& n)
 std::vector<BigInteger> SegmentedSieveOfEratosthenes(BigInteger n)
 {
     // TODO: This should scale to the system.
-    // Assume the L1 cache limit is 128 KB.
+    // Assume the L1/L2 cache limit is 2048 KB.
     // We save half our necessary bytes by
     // removing multiples of 2.
     // The simple sieve removes multiples of 2, 3, and 5.
-    // limit = 128 KB = 131072 B,
+    // limit = 2048 KB = 2097152 B,
     // limit_segmented = limit * 2
     // limit_simple = ((((limit * 2) * 3) / 2) * 5) / 4
-    constexpr size_t limit = 262144ULL;
-    constexpr size_t limit_simple = 1966080ULL;
+    constexpr size_t limit = 4194304ULL;
+    constexpr size_t limit_simple = 31457280ULL;
 
     if (!(n & 1U)) {
         --n;
@@ -311,8 +311,8 @@ std::vector<BigInteger> SegmentedSieveOfEratosthenes(BigInteger n)
         const size_t cardinality = high - low;
         bool notPrime[cardinality + 1U] = { false };
 
-        for (size_t i = 1U; i < sqrtIndex; ++i) {
-            const BigInteger& p = knownPrimes[i];
+        for (size_t k = 1U; k < sqrtIndex; ++k) {
+            const BigInteger& p = knownPrimes[k];
             dispatch.dispatch([&fLo, &low, &cardinality, p, &notPrime]() {
                 // We are skipping multiples of 2.
                 const BigInteger p2 = p << 1U;
@@ -361,15 +361,15 @@ std::vector<BigInteger> SegmentedSieveOfEratosthenes(BigInteger n)
 BigInteger SegmentedCountPrimesTo(BigInteger n)
 {
     // TODO: This should scale to the system.
-    // Assume the L1 cache limit is 128 KB.
+    // Assume the L1/L2 cache limit is 2048 KB.
     // We save half our necessary bytes by
     // removing multiples of 2.
     // The simple sieve removes multiples of 2, 3, and 5.
-    // limit = 128 KB = 131072 B,
+    // limit = 2048 KB = 2097152 B,
     // limit_segmented = limit * 2
     // limit_simple = ((((limit * 2) * 3) / 2) * 5) / 4
-    constexpr size_t limit = 262144ULL;
-    constexpr size_t limit_simple = 1966080ULL;
+    constexpr size_t limit = 4194304ULL;
+    constexpr size_t limit_simple = 31457280ULL;
 
     if (!(n & 1U)) {
         --n;
@@ -409,8 +409,8 @@ BigInteger SegmentedCountPrimesTo(BigInteger n)
 
         // Use the found primes by simpleSieve() to find
         // primes in current range
-        for (size_t i = 1U; i < sqrtIndex; ++i) {
-            const BigInteger& p = knownPrimes[i];
+        for (size_t k = 1U; k < sqrtIndex; ++k) {
+            const BigInteger& p = knownPrimes[k];
             dispatch.dispatch([&fLo, &low, &cardinality, p, &notPrime]() {
                 // We are skipping multiples of 2.
                 const BigInteger p2 = p << 1U;
