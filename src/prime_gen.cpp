@@ -299,6 +299,7 @@ std::vector<BigInteger> SegmentedSieveOfEratosthenes(BigInteger n)
            high = nCardinality;
         }
         const BigInteger fLo = forward2(low);
+        const BigInteger fHi = forward2(high);
 
         // To mark primes in current range. A value in mark[i]
         // will finally be false if 'i-low' is Not a prime,
@@ -310,7 +311,7 @@ std::vector<BigInteger> SegmentedSieveOfEratosthenes(BigInteger n)
         // primes in current range
         for (size_t i = 1U; ; ++i) {
             const BigInteger& p = knownPrimes[i];
-            if ((p * p) > forward(high)) {
+            if ((p * p) > fHi) {
                 break;
             }
             dispatch.dispatch([&fLo, &low, &cardinality, p, &notPrime]() {
@@ -395,6 +396,7 @@ BigInteger SegmentedCountPrimesTo(BigInteger n)
            high = nCardinality;
         }
         const BigInteger fLo = forward2(low);
+        const BigInteger fHi = forward2(high);
 
         // To mark primes in current range. A value in mark[i]
         // will finally be false if 'i-low' is Not a prime,
@@ -405,11 +407,8 @@ BigInteger SegmentedCountPrimesTo(BigInteger n)
         // Use the found primes by simpleSieve() to find
         // primes in current range
         for (size_t i = 1U; ; ++i) {
-            if (i > knownPrimes.size()) {
-                break;
-            }
             const BigInteger& p = knownPrimes[i];
-            if ((p * p) > forward(high)) {
+            if ((p * p) > fHi) {
                 break;
             }
             dispatch.dispatch([&fLo, &low, &cardinality, p, &notPrime]() {
