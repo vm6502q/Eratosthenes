@@ -1,2 +1,0 @@
-from eratosthenes import segmented_count
-segmented_count(1000000000)
