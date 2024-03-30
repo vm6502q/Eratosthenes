@@ -304,8 +304,7 @@ std::vector<BigInteger> SegmentedSieveOfEratosthenes(BigInteger n)
         // will finally be false if 'i-low' is Not a prime,
         // else true.
         const size_t cardinality = high - low;
-        std::unique_ptr<bool> uNotPrime(new bool[cardinality + 1U]());
-        bool* notPrime = uNotPrime.get();
+        bool notPrime[cardinality + 1U] = { false };
 
         // Use the found primes by simpleSieve() to find
         // primes in current range
@@ -401,8 +400,7 @@ BigInteger SegmentedCountPrimesTo(BigInteger n)
         // will finally be false if 'i-low' is Not a prime,
         // else true.
         const size_t cardinality = high - low;
-        std::unique_ptr<bool> uNotPrime(new bool[cardinality + 1U]());
-        bool* notPrime = uNotPrime.get();
+        bool notPrime[cardinality + 1U] = { false };
 
         // Use the found primes by simpleSieve() to find
         // primes in current range
