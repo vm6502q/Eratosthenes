@@ -279,7 +279,7 @@ std::vector<BigInteger> SegmentedSieveOfEratosthenes(BigInteger n)
     if (!(n & 1U)) {
         --n;
     }
-    if ((n < 491520ULL) || (limit_simple >= n)) {
+    if (limit_simple >= n) {
         return SieveOfEratosthenes(n);
     }
     const BigInteger sqrtnp1 = sqrt(n) + 1U;
@@ -375,7 +375,7 @@ BigInteger SegmentedCountPrimesTo(BigInteger n)
     if (!(n & 1U)) {
         --n;
     }
-    if ((n < 491520ULL) || (limit_simple >= n)) {
+    if (limit_simple >= n) {
         return CountPrimesTo(n);
     }
     const BigInteger sqrtnp1 = sqrt(n) + 1U;
