@@ -309,7 +309,7 @@ std::vector<BigInteger> SegmentedSieveOfEratosthenes(BigInteger n)
 
         // Use the found primes by simpleSieve() to find
         // primes in current range
-        for (size_t i = 1U; ; ++i) {
+        for (size_t i = 1U; i < knownPrimes.size(); ++i) {
             const BigInteger& p = knownPrimes[i];
             if ((p * p) > fHi) {
                 break;
@@ -379,15 +379,16 @@ BigInteger SegmentedCountPrimesTo(BigInteger n)
         return CountPrimesTo(n);
     }
     const BigInteger sqrtnp1 = sqrt(n) + 1U;
-    std::vector<BigInteger> knownPrimes = SieveOfEratosthenes(limit_simple);
+    const BigInteger practicalLimit = ((sqrtnp1 < limit_simple) ? sqrtnp1 : limit_simple) | 1U;
+    std::vector<BigInteger> knownPrimes = SieveOfEratosthenes(practicalLimit);
     knownPrimes.reserve(std::expint(log(sqrtnp1)) - std::expint(log(2)));
     size_t count = knownPrimes.size();
 
     // Divide the range [0..n-1] in different segments
     // We have chosen segment size as sqrt(n).
     const size_t nCardinality = backward2(n);
-    size_t low = backward2(limit_simple);
-    size_t high = backward2(limit_simple) + limit;
+    size_t low = backward2(practicalLimit);
+    size_t high = backward2(practicalLimit) + limit;
 
     // Process one segment at a time till we pass n.
     while (low < nCardinality)
@@ -406,7 +407,7 @@ BigInteger SegmentedCountPrimesTo(BigInteger n)
 
         // Use the found primes by simpleSieve() to find
         // primes in current range
-        for (size_t i = 1U; ; ++i) {
+        for (size_t i = 1U; i < knownPrimes.size(); ++i) {
             const BigInteger& p = knownPrimes[i];
             if ((p * p) > fHi) {
                 break;
