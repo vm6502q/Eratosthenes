@@ -285,7 +285,6 @@ std::vector<BigInteger> SegmentedSieveOfEratosthenes(BigInteger n)
     if (limit_simple >= n) {
         return SieveOfEratosthenes(n);
     }
-    const BigInteger sqrtnp1 = sqrt(n) + 1U;
     std::vector<BigInteger> knownPrimes = SieveOfEratosthenes(limit_simple);
     knownPrimes.reserve(std::expint(log(n)) - std::expint(log(2)));
 
