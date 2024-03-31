@@ -288,8 +288,7 @@ std::vector<BigInteger> SegmentedSieveOfEratosthenes(BigInteger n)
     std::vector<BigInteger> knownPrimes = SieveOfEratosthenes(limit_simple);
     knownPrimes.reserve(std::expint(log(n)) - std::expint(log(2)));
 
-    // Divide the range [0..n-1] in different segments
-    // We have chosen segment size as sqrt(n).
+    // Divide the range in different segments
     const size_t nCardinality = backward2(n);
     size_t low = backward2(limit_simple);
     size_t high = low + limit;
@@ -384,8 +383,7 @@ BigInteger SegmentedCountPrimesTo(BigInteger n)
     }
     size_t count = knownPrimes.size();
 
-    // Divide the range [0..n-1] in different segments
-    // We have chosen segment size as sqrt(n).
+    // Divide the range in different segments
     const size_t nCardinality = backward2(n);
     size_t low = backward2(practicalLimit);
     size_t high = low + limit;
@@ -402,14 +400,11 @@ BigInteger SegmentedCountPrimesTo(BigInteger n)
             std::upper_bound(knownPrimes.begin(), knownPrimes.end(), sqrt(forward2(high)) + 1U)
         );
 
-        // To mark primes in current range. A value in mark[i]
-        // will finally be false if 'i-low' is Not a prime,
-        // else true.
         const size_t cardinality = high - low;
         bool notPrime[cardinality + 1U] = { false };
 
-        // Use the found primes by simpleSieve() to find
-        // primes in current range
+        // Use the primes found by the simple sieve
+        // to find primes in current range
         for (size_t k = 1U; k < sqrtIndex; ++k) {
             const BigInteger& p = knownPrimes[k];
             dispatch.dispatch([&fLo, &low, &cardinality, p, &notPrime]() {
@@ -442,14 +437,21 @@ BigInteger SegmentedCountPrimesTo(BigInteger n)
         }
         dispatch.finish();
 
-        // Numbers which are not marked are prime
-        for (size_t o = 1U; o <= cardinality; ++o) {
-            if (!notPrime[o]) {
-                const BigInteger p = forward2(o + low);
-                if (p <= sqrtnp1) {
-                    knownPrimes.push_back(p);
+        if (knownPrimes.back() > sqrtnp1) {
+            for (size_t o = 1U; o <= cardinality; ++o) {
+                if (!notPrime[o]) {
+                    ++count;
                 }
-                ++count;
+            }
+        } else {
+            for (size_t o = 1U; o <= cardinality; ++o) {
+                if (!notPrime[o]) {
+                    const BigInteger p = forward2(o + low);
+                    if (p <= sqrtnp1) {
+                        knownPrimes.push_back(p);
+                    }
+                    ++count;
+                }
             }
         }
 
