@@ -293,7 +293,7 @@ std::vector<BigInteger> SegmentedSieveOfEratosthenes(BigInteger n)
     // We have chosen segment size as sqrt(n).
     const size_t nCardinality = backward2(n);
     size_t low = backward2(limit_simple);
-    size_t high = backward2(limit_simple) + limit;
+    size_t high = low + limit;
 
     // Process one segment at a time till we pass n.
     while (low < nCardinality)
@@ -352,7 +352,7 @@ std::vector<BigInteger> SegmentedSieveOfEratosthenes(BigInteger n)
 
         // Update low and high for next segment
         low = low + limit;
-        high = high + limit;
+        high = low + limit;
     }
 
     return knownPrimes;
@@ -387,7 +387,7 @@ BigInteger SegmentedCountPrimesTo(BigInteger n)
     // We have chosen segment size as sqrt(n).
     const size_t nCardinality = backward2(n);
     size_t low = backward2(practicalLimit);
-    size_t high = backward2(practicalLimit) + limit;
+    size_t high = low + limit;
 
     // Process one segment at a time till we pass n.
     while (low < nCardinality)
@@ -454,7 +454,7 @@ BigInteger SegmentedCountPrimesTo(BigInteger n)
 
         // Update low and high for next segment
         low = low + limit;
-        high = high + limit;
+        high = low + limit;
     }
 
     return count;
