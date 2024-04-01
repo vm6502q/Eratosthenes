@@ -437,7 +437,7 @@ BigInteger SegmentedCountPrimesTo(BigInteger n)
         }
         dispatch.finish();
 
-        if (knownPrimes.back() > sqrtnp1) {
+        if (knownPrimes.back() >= sqrtnp1) {
             for (size_t o = 1U; o <= cardinality; ++o) {
                 if (!notPrime[o]) {
                     ++count;
