@@ -57,18 +57,9 @@ inline BigInteger sqrt(const BigInteger& toTest)
     return ans;
 }
 
-inline BigInteger forward2(const size_t& p) {
-    // Make this NOT a multiple of 2.
-    return (p << 1U) - 1U;
-}
-
 inline BigInteger forward(const size_t& p) {
     // Make this NOT a multiple of 2 or 3.
     return (p << 1U) + (~(~p | 1U)) - 1U;
-}
-
-inline size_t backward2(const BigInteger& p) {
-    return (p + 1U) >> 1U;
 }
 
 inline size_t backward(const BigInteger& n) {
