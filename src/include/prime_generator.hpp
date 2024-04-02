@@ -62,6 +62,13 @@ inline BigInteger forward(const size_t& p) {
     return (p << 1U) + (~(~p | 1U)) - 1U;
 }
 
+inline BigInteger forward5(const size_t& p) {
+    constexpr unsigned char m[30U] = {
+        1U, 7U, 11U, 13U, 17U, 19U, 23U, 29U
+    };
+    return m[p % 8U] + (p / 8U) * 30U;
+}
+
 inline size_t backward(const BigInteger& n) {
     return ((~(~n | 1U)) / 3U) + 1U;
 }
