@@ -1,0 +1,15 @@
+Source: eratosthenes
+Priority: optional
+Maintainer: Daniel Strano <dan@unitary.fund>
+Build-Depends: debhelper-compat (= 12),dh-python,python3,python3-setuptools,python3-pybind11,python3-dev
+Standards-Version: 4.4.1
+X-Python3-Version: >= 3.6
+Section: libs
+Homepage: https://github.com/vm6502q/eratosthenes
+
+Package: eratosthenes
+Architecture: any
+Multi-Arch: same
+Depends: ${python3:Depends},${misc:Depends}
+Description: vm6502q/eratosthenes prime number finder pybind11 wrapper
+ vm6502q/eratosthenes prime number finder pybind11 wrapper

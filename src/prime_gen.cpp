@@ -1,3 +1,187 @@
+//////////////////////////////////////////////////////////////////////////////////////
+//
+// (C) Daniel Strano and the Qrack contributors 2017-2023. All rights reserved.
+//
+// This is a multithreaded, universal quantum register simulation, allowing
+// (nonphysical) register cloning and direct measurement of probability and
+// phase, to leverage what advantages classical emulation of qubits can have.
+//
+// Licensed under the GNU Lesser General Public License V3.
+// See LICENSE.md in the project root or https://www.gnu.org/licenses/lgpl-3.0.en.html
+// for details.
+
+// From https://github.com/embeddedartistry/embedded-resources/blob/master/examples/cpp/dispatch.cpp
+
+#define BIG_INT_BITS 64
+
+#include <condition_variable>
+#include <functional>
+#include <future>
+#include <mutex>
+#include <queue>
+
+#include <cstdint>
+#include <vector>
+
+#if BIG_INT_BITS > 64
+#include <boost/multiprecision/cpp_int.hpp>
+#endif
+
+#include <cmath>
+
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
+
+namespace eratosthenes {
+
+typedef std::function<bool(void)> DispatchFn;
+
+class DispatchQueue {
+public:
+    DispatchQueue(size_t n)
+        : threads_(n)
+        , quit_(false)
+        , isFinished_(true)
+        , isStarted_(false)
+        , result(false)
+    {
+        // Intentionally left blank.
+    }
+
+    ~DispatchQueue()
+    {
+        std::unique_lock<std::mutex> lock(lock_);
+
+        if (!isStarted_) {
+            return;
+        }
+
+        std::queue<DispatchFn> empty;
+        std::swap(q_, empty);
+        quit_ = true;
+
+        lock.unlock();
+        cv_.notify_all();
+
+        // Wait for thread to finish before we exit
+        for (size_t i = 0U; i < threads_.size(); ++i) {
+            threads_[i].get();
+        }
+
+        isFinished_ = true;
+        cvFinished_.notify_all();
+    }
+
+    // Reset output result.
+    void resetResult() { result = false; }
+
+    // dispatch and copy
+    void dispatch(const DispatchFn& op)
+    {
+        std::unique_lock<std::mutex> lock(lock_);
+
+        if (quit_) {
+            return;
+        }
+
+        q_.push(op);
+        isFinished_ = false;
+        if (!isStarted_) {
+            isStarted_ = true;
+            for (size_t i = 0U; i < threads_.size(); ++i) {
+                threads_[i] = std::async(std::launch::async, [this] { dispatch_thread_handler(); });
+            }
+        }
+
+        // Manual unlocking is done before notifying, to avoid waking up
+        // the waiting thread only to block again (see notify_one for details)
+        lock.unlock();
+        cv_.notify_one();
+    }
+
+
+    // finish queue
+    bool finish()
+    {
+        std::unique_lock<std::mutex> lock(lock_);
+
+        if (quit_ || !isStarted_) {
+            return false;
+        }
+
+        cvFinished_.wait(lock, [this] { return isFinished_ || quit_; });
+
+        return result;
+    }
+
+    // dump queue
+    void dump()
+    {
+        std::unique_lock<std::mutex> lock(lock_);
+
+        if (quit_ || !isStarted_) {
+            return;
+        }
+
+        std::queue<DispatchFn> empty;
+        std::swap(q_, empty);
+        isFinished_ = true;
+        lock.unlock();
+        cvFinished_.notify_all();
+    }
+
+    // check if queue is finished
+    bool isFinished() { return isFinished_; }
+
+    // Deleted operations
+    DispatchQueue(const DispatchQueue& rhs) = delete;
+    DispatchQueue& operator=(const DispatchQueue& rhs) = delete;
+    DispatchQueue(DispatchQueue&& rhs) = delete;
+    DispatchQueue& operator=(DispatchQueue&& rhs) = delete;
+
+private:
+    std::mutex lock_;
+    std::vector<std::future<void>> threads_;
+    std::queue<DispatchFn> q_;
+    std::condition_variable cv_;
+    std::condition_variable cvFinished_;
+    bool quit_;
+    bool isFinished_;
+    bool isStarted_;
+    bool result;
+
+    void dispatch_thread_handler(void)
+    {
+        std::unique_lock<std::mutex> lock(lock_);
+
+        do {
+            // Wait until we have data or a quit signal
+            cv_.wait(lock, [this] { return (q_.size() || quit_); });
+            // after wait, we own the lock
+
+            if (quit_) {
+                continue;
+            }
+
+            auto op = std::move(q_.front());
+            q_.pop();
+
+            // unlock now that we're done messing with the queue
+            lock.unlock();
+
+            result |= op();
+            quit_ |= result;
+
+            lock.lock();
+
+            if (!q_.size()) {
+                isFinished_ = true;
+                cvFinished_.notify_all();
+            }
+        } while (!quit_);
+    }
+};
+
 // Source: https://www.geeksforgeeks.org/sieve-of-eratosthenes/
 // C++ program to print all primes smaller than or equal to
 // n using Sieve of Eratosthenes
@@ -10,15 +194,105 @@
 // number under trial. Multiples of 2, 3, 5, 7, and 11 can
 // be entirely skipped in loop enumeration.
 
-#include "prime_generator.hpp"
-#include "dispatchqueue.hpp"
+#if BIG_INT_BITS < 33
+typedef uint32_t BigInteger;
+#elif BIG_INT_BITS < 65
+typedef uint64_t BigInteger;
+#else
+typedef boost::multiprecision::number<boost::multiprecision::cpp_int_backend<BIG_INT_BITS, BIG_INT_BITS,
+    boost::multiprecision::unsigned_magnitude, boost::multiprecision::unchecked, void>>
+    BigInteger;
+#endif
 
-#include <cmath>
+inline BigInteger sqrt(const BigInteger& toTest)
+{
+    // Otherwise, find b = sqrt(b^2).
+    BigInteger start = 1U, end = toTest >> 1U, ans = 0U;
+    do {
+        const BigInteger mid = (start + end) >> 1U;
 
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
+        // If toTest is a perfect square
+        const BigInteger sqr = mid * mid;
+        if (sqr == toTest) {
+            return mid;
+        }
 
-namespace qimcifa {
+        if (sqr < toTest) {
+            // Since we need floor, we update answer when mid*mid is smaller than p, and move closer to sqrt(p).
+            start = mid + 1U;
+            ans = mid;
+        } else {
+            // If mid*mid is greater than p
+            end = mid - 1U;
+        }
+    } while (start <= end);
+
+    return ans;
+}
+
+inline BigInteger forward(const size_t& p) {
+    // Make this NOT a multiple of 2 or 3.
+    return (p << 1U) + (~(~p | 1U)) - 1U;
+}
+
+inline BigInteger forward5(const size_t& p) {
+    constexpr unsigned char m[8U] = {
+        1U, 7U, 11U, 13U, 17U, 19U, 23U, 29U
+    };
+    return m[p % 8U] + (p / 8U) * 30U;
+}
+
+inline BigInteger forward7(const size_t& p) {
+    constexpr unsigned char m[48U] = {
+        1U, 11U, 13U, 17U, 19U, 23U, 29U, 31U, 37U, 41U, 43U, 47U, 53U, 59U, 61U, 67U, 71U, 73U, 79U, 83U, 89U,
+        97U, 101U, 103U, 107U, 109U, 113U, 121U, 127U, 131U, 137U, 139U, 143U, 149U, 151U, 157U, 163U, 167U,
+        169U, 173U, 179U, 181U, 187U, 191U, 193U, 197U, 199U, 209U
+    };
+    return m[p % 48U] + (p / 48U) * 210U;
+}
+
+inline size_t backward(const BigInteger& n) {
+    return ((~(~n | 1U)) / 3U) + 1U;
+}
+
+inline size_t backward5(const BigInteger& n) {
+    return (((((n + 1U) << 2U) / 5U + 1U) << 1U) / 3U + 1U) >> 1U;
+}
+
+inline size_t backward7(const BigInteger& n) {
+    constexpr unsigned char m[48U] = {
+        1U, 11U, 13U, 17U, 19U, 23U, 29U, 31U, 37U, 41U, 43U, 47U, 53U, 59U, 61U, 67U, 71U, 73U, 79U, 83U, 89U,
+        97U, 101U, 103U, 107U, 109U, 113U, 121U, 127U, 131U, 137U, 139U, 143U, 149U, 151U, 157U, 163U, 167U,
+        169U, 173U, 179U, 181U, 187U, 191U, 193U, 197U, 199U, 209U
+    };
+    return std::distance(m, std::lower_bound(m, m + 48U, n % 210U)) + 48U * (n / 210U) + 1U;
+}
+
+inline size_t GetWheel5and7Increment(unsigned short& wheel5, unsigned long long& wheel7) {
+    constexpr unsigned short wheel5Back = 1U << 9U;
+    constexpr unsigned long long wheel7Back = 1ULL << 55U;
+    unsigned wheelIncrement = 0U;
+    bool is_wheel_multiple = false;
+    do {
+        is_wheel_multiple = (bool)(wheel5 & 1U);
+        wheel5 >>= 1U;
+        if (is_wheel_multiple) {
+            wheel5 |= wheel5Back;
+            ++wheelIncrement;
+            continue;
+        }
+
+        is_wheel_multiple = (bool)(wheel7 & 1U);
+        wheel7 >>= 1U;
+        if (is_wheel_multiple) {
+            wheel7 |= wheel7Back;
+        }
+        ++wheelIncrement;
+    } while (is_wheel_multiple);
+
+    return (size_t)wheelIncrement;
+}
+
 DispatchQueue dispatch(std::thread::hardware_concurrency());
 
 std::vector<BigInteger> SieveOfEratosthenes(const BigInteger& n)
@@ -471,9 +745,9 @@ BigInteger SegmentedCountPrimesTo(BigInteger n)
 
     return count;
 }
-} // namespace qimcifa
+} // namespace eratosthenes
 
-using namespace qimcifa;
+using namespace eratosthenes;
 
 PYBIND11_MODULE(eratosthenes, m) {
     m.doc() = "pybind11 plugin to generate prime numbers";
