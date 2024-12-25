@@ -1,4 +1,5 @@
 import os
+import setuptools
 from distutils.core import setup, Extension
 
 cpp_args = ['-std=c++17', '-lpthread']
