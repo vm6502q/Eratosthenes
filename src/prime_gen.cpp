@@ -11,7 +11,6 @@
 // be entirely skipped in loop enumeration.
 
 #include "config.h"
-#include "prime_generator.hpp"
 #include "dispatchqueue.hpp"
 
 #include <cmath>
