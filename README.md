@@ -18,7 +18,7 @@ num_primes = segmented_count(1000)
 ```
 
 ## About
-Eratosthenes is written in C++17 and bound for Python with `pybind11`. This makes it faster than just about any native Python implementation of Sieve of Eratosthenes or Trial Division!
+Eratosthenes is written in C++17 and bound for Python with `pybind11`. This makes it faster than just about any native Python implementation of Sieve of Eratosthenes!
 
 ## Copyright
 
