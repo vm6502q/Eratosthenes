@@ -38,5 +38,6 @@ setup(
         "Programming Language :: Python :: 3.10",
         "Topic :: Scientific/Engineering",
     ],
+    install_requires=["pybind11"],
     ext_modules=ext_modules,
 )
