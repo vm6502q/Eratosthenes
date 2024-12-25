@@ -19,7 +19,7 @@ ext_modules = [
 
 setup(
     name='Eratosthenes',
-    version='3.0.11',
+    version='3.0.12',
     author='Dan Strano',
     author_email='dan@unitary.fund',
     description='Fast prime generation for Python based on Sieve of Eratosthenes and Trial Division',
