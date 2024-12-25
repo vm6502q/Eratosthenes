@@ -356,7 +356,7 @@ BigInteger CountPrimesTo(const BigInteger& n)
     dispatch.finish();
 
     for (;;) {
-        const BigInteger p = forward(o);
+        const BigInteger p = forward2and3(o);
         if (p > n) {
             break;
         }
