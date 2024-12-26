@@ -88,7 +88,7 @@ inline size_t backward7(const BigInteger& n) {
         97U, 101U, 103U, 107U, 109U, 113U, 121U, 127U, 131U, 137U, 139U, 143U, 149U, 151U, 157U, 163U, 167U,
         169U, 173U, 179U, 181U, 187U, 191U, 193U, 197U, 199U, 209U
     };
-    return std::distance(m, std::lower_bound(m, m + 48U, n % 210U)) + 48U * (n / 210U) + 1U;
+    return (size_t)(std::distance(m, std::lower_bound(m, m + 48U, n % 210U)) + 48U * (n / 210U) + 1U);
 }
 
 inline size_t GetWheel5and7Increment(unsigned short& wheel5, unsigned long long& wheel7) {
