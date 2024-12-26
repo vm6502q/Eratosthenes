@@ -11,7 +11,7 @@ with open(README_PATH) as readme_file:
 ext_modules = [
     Extension(
         '_eratosthenes',
-        ['Eratosthenes/prime_gen.cpp', "Eratosthenes/dispatchqueue.cpp"],
+        ['Eratosthenes/_eratosthenes.cpp', "Eratosthenes/dispatchqueue.cpp"],
         include_dirs=['Eratosthenes/include', 'pybind11/include'],
         language='c++',
         extra_compile_args = cpp_args,
