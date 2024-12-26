@@ -41,4 +41,5 @@ setup(
     ],
     install_requires=["pybind11"],
     ext_modules=ext_modules,
+    packages=['Eratosthenes'],
 )
