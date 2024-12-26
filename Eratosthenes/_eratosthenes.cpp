@@ -482,7 +482,7 @@ std::vector<std::string> _SegmentedSieveOfEratosthenes(const std::string& n) {
     return toRet;
 }
 
-BigInteger SegmentedCountPrimesTo(const BigInteger& n)
+BigInteger SegmentedCountPrimesTo(BigInteger n)
 {
     // TODO: This should scale to the system.
     // Assume the L1/L2 cache limit is 2048 KB.
