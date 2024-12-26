@@ -23,7 +23,7 @@
 
 namespace qimcifa {
 
-typedef typedef boost::multiprecision::cpp_int BigInteger;
+typedef boost::multiprecision::cpp_int BigInteger;
 
 inline BigInteger sqrt(const BigInteger& toTest)
 {
