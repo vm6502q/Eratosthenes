@@ -12,7 +12,7 @@ ext_modules = [
     Extension(
         '_eratosthenes',
         ['Eratosthenes/prime_gen.cpp', "Eratosthenes/dispatchqueue.cpp"],
-        include_dirs=['src/include', 'pybind11/include'],
+        include_dirs=['Eratosthenes/include', 'pybind11/include'],
         language='c++',
         extra_compile_args = cpp_args,
     ),
