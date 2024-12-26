@@ -75,11 +75,11 @@ inline BigInteger forward7(const size_t& p) {
 }
 
 inline size_t backward2and3(const BigInteger& n) {
-    return ((~(~n | 1U)) / 3U) + 1U;
+    return (size_t)((~(~n | 1U)) / 3U) + 1U;
 }
 
 inline size_t backward5(const BigInteger& n) {
-    return (((((n + 1U) << 2U) / 5U + 1U) << 1U) / 3U + 1U) >> 1U;
+    return (size_t)(((((n + 1U) << 2U) / 5U + 1U) << 1U) / 3U + 1U) >> 1U;
 }
 
 inline size_t backward7(const BigInteger& n) {
