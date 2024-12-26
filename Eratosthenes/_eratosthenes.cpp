@@ -374,7 +374,7 @@ BigInteger CountPrimesTo(const BigInteger& n)
     return count;
 }
 
-std::string _CountPrimesTo(const string& n) {
+std::string _CountPrimesTo(const std::string& n) {
     return boost::lexical_cast<std::string>(CountPrimesTo(BigInteger(n)));
 }
 
