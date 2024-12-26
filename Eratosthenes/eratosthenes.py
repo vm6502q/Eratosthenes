@@ -15,7 +15,7 @@ def sieve(n):
     return l
 
 def segmented_sieve(n):
-    v = _eratosthenes._segmmented_sieve(str(n))
+    v = _eratosthenes._segmented_sieve(str(n))
     l = []
     for p in v:
         l.append(int(p))
