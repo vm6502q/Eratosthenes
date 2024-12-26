@@ -257,7 +257,7 @@ std::vector<std::string> _SieveOfEratosthenes(const std::string& n) {
 
 BigInteger CountPrimesTo(const BigInteger& n)
 {
-    constexpr BigInteger knownPrimes[4U] = { 2U, 3U, 5U, 7U };
+    const BigInteger knownPrimes[4U] = { 2U, 3U, 5U, 7U };
     if (n < 2U) {
         return 0U;
     }
