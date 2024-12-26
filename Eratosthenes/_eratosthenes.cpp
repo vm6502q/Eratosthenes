@@ -10,32 +10,20 @@
 // number under trial. Multiples of 2, 3, 5, 7, and 11 can
 // be entirely skipped in loop enumeration.
 
-#include "config.h"
 #include "dispatchqueue.hpp"
 
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
+#include <string>
 #include <vector>
-
-#if BIG_INT_BITS > 64
-#include <boost/multiprecision/cpp_int.hpp>
-#endif
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
 namespace qimcifa {
 
-#if BIG_INT_BITS < 33
-typedef uint32_t BigInteger;
-#elif BIG_INT_BITS < 65
-typedef uint64_t BigInteger;
-#else
-typedef boost::multiprecision::number<boost::multiprecision::cpp_int_backend<BIG_INT_BITS, BIG_INT_BITS,
-    boost::multiprecision::unsigned_magnitude, boost::multiprecision::unchecked, void>>
-    BigInteger;
-#endif
+typedef typedef boost::multiprecision::cpp_int BigInteger;
 
 inline BigInteger sqrt(const BigInteger& toTest)
 {
@@ -248,6 +236,17 @@ std::vector<BigInteger> SieveOfEratosthenes(const BigInteger& n)
     return knownPrimes;
 }
 
+std::vector<std::string> _SieveOfEratosthenes(const std::string& n) {
+    std::vector<BigInteger> v = SieveOfEratosthenes(BigInteger(n));
+    std::vector<std::string> toRet;
+    toRet.reserve(v.size());
+    for (const BigInteger& p : v) {
+        toRet.push_back(boost::lexical_cast<std::string>(p));
+    }
+
+    return toRet;
+}
+
 // Pardon the obvious "copy/pasta."
 // I began to design a single method to switch off between these two,
 // then I realized the execution time overhead of the implementation.
@@ -373,6 +372,10 @@ BigInteger CountPrimesTo(const BigInteger& n)
     return count;
 }
 
+std::string _CountPrimesTo(const string& n) {
+    return boost::lexical_cast<std::string>(CountPrimesTo(BigInteger(n)));
+}
+
 std::vector<BigInteger> SegmentedSieveOfEratosthenes(BigInteger n)
 {
     // TODO: This should scale to the system.
@@ -466,7 +469,18 @@ std::vector<BigInteger> SegmentedSieveOfEratosthenes(BigInteger n)
     return knownPrimes;
 }
 
-BigInteger SegmentedCountPrimesTo(BigInteger n)
+std::vector<std::string> _SegmentedSieveOfEratosthenes(const std::string& n) {
+    std::vector<BigInteger> v = SegmentedSieveOfEratosthenes(BigInteger(n));
+    std::vector<std::string> toRet;
+    toRet.reserve(v.size());
+    for (const BigInteger& p : v) {
+        toRet.push_back(boost::lexical_cast<std::string>(p));
+    }
+
+    return toRet;
+}
+
+BigInteger SegmentedCountPrimesTo(const BigInteger& n)
 {
     // TODO: This should scale to the system.
     // Assume the L1/L2 cache limit is 2048 KB.
@@ -578,14 +592,18 @@ BigInteger SegmentedCountPrimesTo(BigInteger n)
 
     return count;
 }
+
+std::string _SegmentedCountPrimesTo(const std::string& n) {
+    return boost::lexical_cast<std::string>(SegmentedCountPrimesTo(BigInteger(n)));
+}
 } // namespace qimcifa
 
 using namespace qimcifa;
 
-PYBIND11_MODULE(eratosthenes, m) {
+PYBIND11_MODULE(_eratosthenes, m) {
     m.doc() = "pybind11 plugin to generate prime numbers";
-    m.def("count", &CountPrimesTo, "Counts the prime numbers between 1 and the value of its argument");
-    m.def("segmented_count", &SegmentedCountPrimesTo, "Counts the primes in capped space complexity");
-    m.def("sieve", &SieveOfEratosthenes, "Returns all primes up to the value of its argument (using Sieve of Eratosthenes)");
-    m.def("segmented_sieve", &SegmentedSieveOfEratosthenes, "Returns the primes in capped space complexity");
+    m.def("count", &_CountPrimesTo, "Counts the prime numbers between 1 and the value of its argument");
+    m.def("segmented_count", &_SegmentedCountPrimesTo, "Counts the primes in capped space complexity");
+    m.def("sieve", &_SieveOfEratosthenes, "Returns all primes up to the value of its argument (using Sieve of Eratosthenes)");
+    m.def("segmented_sieve", &_SegmentedSieveOfEratosthenes, "Returns the primes in capped space complexity");
 }
