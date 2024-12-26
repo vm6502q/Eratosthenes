@@ -604,8 +604,8 @@ using namespace qimcifa;
 
 PYBIND11_MODULE(_eratosthenes, m) {
     m.doc() = "pybind11 plugin to generate prime numbers";
-    m.def("count", &_CountPrimesTo, "Counts the prime numbers between 1 and the value of its argument");
-    m.def("segmented_count", &_SegmentedCountPrimesTo, "Counts the primes in capped space complexity");
-    m.def("sieve", &_SieveOfEratosthenes, "Returns all primes up to the value of its argument (using Sieve of Eratosthenes)");
-    m.def("segmented_sieve", &_SegmentedSieveOfEratosthenes, "Returns the primes in capped space complexity");
+    m.def("_count", &_CountPrimesTo, "Counts the prime numbers between 1 and the value of its argument");
+    m.def("_segmented_count", &_SegmentedCountPrimesTo, "Counts the primes in capped space complexity");
+    m.def("_sieve", &_SieveOfEratosthenes, "Returns all primes up to the value of its argument (using Sieve of Eratosthenes)");
+    m.def("_segmented_sieve", &_SegmentedSieveOfEratosthenes, "Returns the primes in capped space complexity");
 }
