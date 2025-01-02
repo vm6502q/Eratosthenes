@@ -128,31 +128,6 @@ inline size_t backward11(const BigInteger &n) {
     return std::distance(wheel11, std::lower_bound(wheel11, wheel11 + 480U, size_t(n % 2310U))) + 480U * (size_t)(n / 2310U) + 1U;
 }
 
-inline size_t GetWheel5and7Increment(unsigned short& wheel5, unsigned long long& wheel7) {
-    constexpr unsigned short wheel5Back = 1U << 9U;
-    constexpr unsigned long long wheel7Back = 1ULL << 55U;
-    unsigned wheelIncrement = 0U;
-    bool is_wheel_multiple = false;
-    do {
-        is_wheel_multiple = (bool)(wheel5 & 1U);
-        wheel5 >>= 1U;
-        if (is_wheel_multiple) {
-            wheel5 |= wheel5Back;
-            ++wheelIncrement;
-            continue;
-        }
-
-        is_wheel_multiple = (bool)(wheel7 & 1U);
-        wheel7 >>= 1U;
-        if (is_wheel_multiple) {
-            wheel7 |= wheel7Back;
-        }
-        ++wheelIncrement;
-    } while (is_wheel_multiple);
-
-    return (size_t)wheelIncrement;
-}
-
 DispatchQueue dispatch(std::thread::hardware_concurrency());
 
 std::vector<BigInteger> SieveOfEratosthenes(const BigInteger& n)
@@ -233,17 +208,6 @@ std::vector<BigInteger> SieveOfEratosthenes(const BigInteger& n)
     }
 
     return knownPrimes;
-}
-
-std::vector<std::string> _SieveOfEratosthenes(const std::string& n) {
-    std::vector<BigInteger> v = SieveOfEratosthenes(BigInteger(n));
-    std::vector<std::string> toRet;
-    toRet.reserve(v.size());
-    for (const BigInteger& p : v) {
-        toRet.push_back(boost::lexical_cast<std::string>(p));
-    }
-
-    return toRet;
 }
 
 // Pardon the obvious "copy/pasta."
@@ -329,10 +293,6 @@ BigInteger CountPrimesTo(const BigInteger& n)
     }
 
     return count;
-}
-
-std::string _CountPrimesTo(const std::string& n) {
-    return boost::lexical_cast<std::string>(CountPrimesTo(BigInteger(n)));
 }
 
 std::vector<BigInteger> SegmentedSieveOfEratosthenes(BigInteger n)
@@ -428,17 +388,6 @@ std::vector<BigInteger> SegmentedSieveOfEratosthenes(BigInteger n)
     }
 
     return knownPrimes;
-}
-
-std::vector<std::string> _SegmentedSieveOfEratosthenes(const std::string& n) {
-    std::vector<BigInteger> v = SegmentedSieveOfEratosthenes(BigInteger(n));
-    std::vector<std::string> toRet;
-    toRet.reserve(v.size());
-    for (const BigInteger& p : v) {
-        toRet.push_back(boost::lexical_cast<std::string>(p));
-    }
-
-    return toRet;
 }
 
 BigInteger SegmentedCountPrimesTo(BigInteger n)
@@ -554,6 +503,32 @@ BigInteger SegmentedCountPrimesTo(BigInteger n)
     }
 
     return count;
+}
+
+std::vector<std::string> _SieveOfEratosthenes(const std::string& n) {
+    std::vector<BigInteger> v = SieveOfEratosthenes(BigInteger(n));
+    std::vector<std::string> toRet;
+    toRet.reserve(v.size());
+    for (const BigInteger& p : v) {
+        toRet.push_back(boost::lexical_cast<std::string>(p));
+    }
+
+    return toRet;
+}
+
+std::string _CountPrimesTo(const std::string& n) {
+    return boost::lexical_cast<std::string>(CountPrimesTo(BigInteger(n)));
+}
+
+std::vector<std::string> _SegmentedSieveOfEratosthenes(const std::string& n) {
+    std::vector<BigInteger> v = SegmentedSieveOfEratosthenes(BigInteger(n));
+    std::vector<std::string> toRet;
+    toRet.reserve(v.size());
+    for (const BigInteger& p : v) {
+        toRet.push_back(boost::lexical_cast<std::string>(p));
+    }
+
+    return toRet;
 }
 
 std::string _SegmentedCountPrimesTo(const std::string& n) {
