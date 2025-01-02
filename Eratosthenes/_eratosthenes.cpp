@@ -25,6 +25,8 @@
 
 namespace qimcifa {
 
+DispatchQueue dispatch(std::thread::hardware_concurrency());
+
 typedef boost::multiprecision::cpp_int BigInteger;
 
 inline BigInteger sqrt(const BigInteger& toTest)
@@ -80,7 +82,7 @@ inline BigInteger forward5(const size_t& p) {
 }
 
 inline size_t backward5(const BigInteger &n) {
-    return (size_t)(std::distance(wheel5, std::lower_bound(wheel5, wheel5 + 8U, n % 30U)) + 8U * (n / 30U) + 1U);
+    return std::distance(wheel5, std::lower_bound(wheel5, wheel5 + 8U, (size_t)(n % 30U))) + 8U * (size_t)(n / 30U) + 1U;
 }
 
 constexpr unsigned char wheel7[48U] = {
@@ -94,7 +96,7 @@ inline BigInteger forward7(const size_t& p) {
 }
 
 inline size_t backward7(const BigInteger& n) {
-    return (size_t)(std::distance(wheel7, std::lower_bound(wheel7, wheel7 + 48U, n % 210U)) + 48U * (n / 210U) + 1U);
+    return std::distance(wheel7, std::lower_bound(wheel7, wheel7 + 48U, (size_t)(n % 210U))) + 48U * (size_t)(n / 210U) + 1U;
 }
 
 constexpr unsigned short wheel11[480U] = {
@@ -125,10 +127,8 @@ inline BigInteger forward11(const size_t &p) {
 }
 
 inline size_t backward11(const BigInteger &n) {
-    return std::distance(wheel11, std::lower_bound(wheel11, wheel11 + 480U, size_t(n % 2310U))) + 480U * (size_t)(n / 2310U) + 1U;
+    return std::distance(wheel11, std::lower_bound(wheel11, wheel11 + 480U, (size_t)(n % 2310U))) + 480U * (size_t)(n / 2310U) + 1U;
 }
-
-DispatchQueue dispatch(std::thread::hardware_concurrency());
 
 std::vector<BigInteger> SieveOfEratosthenes(const BigInteger& n)
 {
