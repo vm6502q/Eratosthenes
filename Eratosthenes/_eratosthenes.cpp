@@ -55,31 +55,22 @@ inline BigInteger sqrt(const BigInteger& toTest)
     return ans;
 }
 
-inline BigInteger forward2(const size_t& p) {
-    // Make this NOT a multiple of 2.
-    return (p << 1U) | 1U;
-}
+// We are multiplying out the first distinct primes, below.
 
-inline size_t backward2(const BigInteger& p) {
-    return (size_t)(p >> 1U);
-}
+// Make this NOT a multiple of 2.
+inline BigInteger forward2(const size_t& p) { return (p << 1U) | 1U; }
 
-inline BigInteger forward3(const size_t& p) {
-    // Make this NOT a multiple of 2 or 3.
-    return (p << 1U) + (~(~p | 1U)) - 1U;
-}
+inline size_t backward2(const BigInteger& p) { return (size_t)(p >> 1U); }
 
-inline size_t backward3(const BigInteger& n) {
-    return (size_t)((~(~n | 1U)) / 3U) + 1U;
-}
+// Make this NOT a multiple of 2 or 3.
+inline BigInteger forward3(const size_t& p) { return (p << 1U) + (~(~p | 1U)) - 1U; }
 
-constexpr unsigned char wheel5[8U] = {
-    1U, 7U, 11U, 13U, 17U, 19U, 23U, 29U
-};
+inline size_t backward3(const BigInteger& n) { return (size_t)((~(~n | 1U)) / 3U) + 1U; }
 
-inline BigInteger forward5(const size_t& p) {
-    return wheel5[p % 8U] + (p / 8U) * 30U;
-}
+constexpr unsigned char wheel5[8U] = { 1U, 7U, 11U, 13U, 17U, 19U, 23U, 29U };
+
+// Make this NOT a multiple of 2, 3, or 5.
+inline BigInteger forward5(const size_t& p) { return wheel5[p % 8U] + (p / 8U) * 30U; }
 
 inline size_t backward5(const BigInteger &n) {
     return std::distance(wheel5, std::lower_bound(wheel5, wheel5 + 8U, (size_t)(n % 30U))) + 8U * (size_t)(n / 30U) + 1U;
@@ -91,9 +82,8 @@ constexpr unsigned char wheel7[48U] = {
     169U, 173U, 179U, 181U, 187U, 191U, 193U, 197U, 199U, 209U
 };
 
-inline BigInteger forward7(const size_t& p) {
-    return wheel7[p % 48U] + (p / 48U) * 210U;
-}
+// Make this NOT a multiple of 2, 3, 5, or 7.
+inline BigInteger forward7(const size_t& p) { return wheel7[p % 48U] + (p / 48U) * 210U; }
 
 inline size_t backward7(const BigInteger& n) {
     return std::distance(wheel7, std::lower_bound(wheel7, wheel7 + 48U, (size_t)(n % 210U))) + 48U * (size_t)(n / 210U) + 1U;
@@ -121,10 +111,8 @@ constexpr unsigned short wheel11[480U] = {
     2081U, 2083U, 2087U, 2089U, 2099U, 2111U, 2113U, 2117U, 2119U, 2129U, 2131U, 2137U, 2141U, 2143U, 2147U, 2153U, 2159U, 2161U, 2171U, 2173U, 2179U, 2183U, 2197U, 2201U,
     2203U, 2207U, 2209U, 2213U, 2221U, 2227U, 2231U, 2237U, 2239U, 2243U, 2249U, 2251U, 2257U, 2263U, 2267U, 2269U, 2273U, 2279U, 2281U, 2287U, 2291U, 2293U, 2297U, 2309U};
 
-inline BigInteger forward11(const size_t &p) {
-  // Make this NOT a multiple of 2, 3, 5, 7, or 11.
-  return wheel11[p % 480U] + (p / 480U) * 2310U;
-}
+// Make this NOT a multiple of 2, 3, 5, 7, or 11.
+inline BigInteger forward11(const size_t &p) { return wheel11[p % 480U] + (p / 480U) * 2310U; }
 
 inline size_t backward11(const BigInteger &n) {
     return std::distance(wheel11, std::lower_bound(wheel11, wheel11 + 480U, (size_t)(n % 2310U))) + 480U * (size_t)(n / 2310U) + 1U;
