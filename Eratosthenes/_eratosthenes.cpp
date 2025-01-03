@@ -152,9 +152,9 @@ std::vector<BigInteger> SieveOfEratosthenes(const BigInteger& n)
     BigInteger threadBoundary = 144U;
 
     // Get the remaining prime numbers.
-    size_t o = 1U;
+    size_t o = 0U;
     for (;;) {
-        const BigInteger p = forward11(o);
+        const BigInteger p = forward11(++o);
         if ((p * p) > n) {
             break;
         }
@@ -236,10 +236,10 @@ BigInteger CountPrimesTo(const BigInteger& n)
     BigInteger threadBoundary = 144U;
 
     // Get the remaining prime numbers.
-    size_t o = 1U;
+    size_t o = 0U;
     BigInteger count = 5U;
     for (;;) {
-        const BigInteger p = forward11(o);
+        const BigInteger p = forward11(++o);
         if ((p * p) > n) {
             break;
         }
