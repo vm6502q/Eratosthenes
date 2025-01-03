@@ -10,8 +10,6 @@
 // number under trial. Multiples of 2, 3, 5, 7, and 11 can
 // be entirely skipped in loop enumeration.
 
-#include "dispatchqueue.hpp"
-
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
@@ -24,8 +22,6 @@
 #include <pybind11/stl.h>
 
 namespace qimcifa {
-
-DispatchQueue dispatch(std::thread::hardware_concurrency());
 
 typedef boost::multiprecision::cpp_int BigInteger;
 
@@ -170,12 +166,6 @@ std::vector<BigInteger> SieveOfEratosthenes(const BigInteger& n)
     std::unique_ptr<bool[]> uNotPrime(new bool[cardinality + 1U]());
     bool* notPrime = uNotPrime.get();
 
-    // We dispatch multiple marking asynchronously.
-    // If we've already marked all primes up to x,
-    // we're free to continue to up to x * x,
-    // then we synchronize.
-    BigInteger threadBoundary = 36U;
-
     // Get the remaining prime numbers.
     unsigned short wheel5 = 129U;
     unsigned long long wheel7 = 9009416540524545ULL;
@@ -188,62 +178,51 @@ std::vector<BigInteger> SieveOfEratosthenes(const BigInteger& n)
             break;
         }
 
-        if (threadBoundary < p) {
-            dispatch.finish();
-            threadBoundary *= threadBoundary;
-        }
-
         if (notPrime[backward5(p)]) {
             continue;
         }
 
         knownPrimes.push_back(p);
 
-        dispatch.dispatch([&n, p, &notPrime]() {
-            // We are skipping multiples of 2, 3, and 5
-            // for space complexity, for 4/15 the bits.
-            // More are skipped by the wheel for time.
-            const BigInteger p2 = p << 1U;
-            const BigInteger p4 = p << 2U;
-            BigInteger i = p * p;
+        // We are skipping multiples of 2, 3, and 5
+        // for space complexity, for 4/15 the bits.
+        // More are skipped by the wheel for time.
+        const BigInteger p2 = p << 1U;
+        const BigInteger p4 = p << 2U;
+        BigInteger i = p * p;
 
-            // "p" already definitely not a multiple of 3.
-            // Its remainder when divided by 3 can be 1 or 2.
-            // If it is 2, we can do a "half iteration" of the
-            // loop that would handle remainder of 1, and then
-            // we can proceed with the 1 remainder loop.
-            // This saves 2/3 of updates (or modulo).
-            if ((p % 3U) == 2U) {
+        // "p" already definitely not a multiple of 3.
+        // Its remainder when divided by 3 can be 1 or 2.
+        // If it is 2, we can do a "half iteration" of the
+        // loop that would handle remainder of 1, and then
+        // we can proceed with the 1 remainder loop.
+        // This saves 2/3 of updates (or modulo).
+        if ((p % 3U) == 2U) {
+            notPrime[backward5(i)] = true;
+            i += p2;
+            if (i > n) {
+                continue;
+            }
+        }
+
+        for (;;) {
+            if (i % 5U) {
                 notPrime[backward5(i)] = true;
-                i += p2;
-                if (i > n) {
-                    return false;
-                }
+            }
+            i += p4;
+            if (i > n) {
+                break;
             }
 
-            for (;;) {
-                if (i % 5U) {
-                    notPrime[backward5(i)] = true;
-                }
-                i += p4;
-                if (i > n) {
-                    return false;
-                }
-
-                if (i % 5U) {
-                    notPrime[backward5(i)] = true;
-                }
-                i += p2;
-                if (i > n) {
-                    return false;
-                }
+            if (i % 5U) {
+                notPrime[backward5(i)] = true;
             }
-
-            return false;
-        });
+            i += p2;
+            if (i > n) {
+                break;
+            }
+        }
     }
-
-    dispatch.finish();
 
     for (;;) {
         const BigInteger p = forward3(o);
@@ -309,37 +288,32 @@ std::vector<BigInteger> SegmentedSieveOfEratosthenes(BigInteger n)
 
         for (size_t k = 3U; k < sqrtIndex; ++k) {
             const BigInteger& p = knownPrimes[k];
-            dispatch.dispatch([&fLo, &low, &cardinality, p, &notPrime]() {
-                // We are skipping multiples of 2.
-                const BigInteger p2 = p << 1U;
+            // We are skipping multiples of 2.
+            const BigInteger p2 = p << 1U;
 
-                // Find the minimum number in [low..high] that is
-                // a multiple of prime[i] (divisible by prime[i])
-                // For example, if low is 31 and prime[i] is 3,
-                // we start with 33.
-                BigInteger i = (fLo / p) * p;
-                if (i < fLo) {
-                    i += p;
-                }
-                if ((i & 1U) == 0U) {
-                    i += p;
-                }
+            // Find the minimum number in [low..high] that is
+            // a multiple of prime[i] (divisible by prime[i])
+            // For example, if low is 31 and prime[i] is 3,
+            // we start with 33.
+            BigInteger i = (fLo / p) * p;
+            if (i < fLo) {
+                i += p;
+            }
+            if ((i & 1U) == 0U) {
+                i += p;
+            }
 
-                for (;;) {
-                    const size_t o = backward5(i) - low;
-                    if (o > cardinality) {
-                        return false;
-                    }
-                    if ((i % 3U) && (i % 5U)) {
-                        notPrime[o] = true;
-                    }
-                    i += p2;
+            for (;;) {
+                const size_t o = backward5(i) - low;
+                if (o > cardinality) {
+                    break;
                 }
-
-                return false;
-            });
+                if ((i % 3U) && (i % 5U)) {
+                    notPrime[o] = true;
+                }
+                i += p2;
+            }
         }
-        dispatch.finish();
 
         // Numbers which are not marked are prime
         for (size_t o = 1U; o <= cardinality; ++o) {
@@ -387,12 +361,6 @@ BigInteger CountPrimesTo(const BigInteger& n)
     std::unique_ptr<bool[]> uNotPrime(new bool[cardinality + 1U]());
     bool* notPrime = uNotPrime.get();
 
-    // We dispatch multiple marking asynchronously.
-    // If we've already marked all primes up to x,
-    // we're free to continue to up to x * x,
-    // then we synchronize.
-    BigInteger threadBoundary = 36U;
-
     // Get the remaining prime numbers.
     unsigned short wheel5 = 129U;
     unsigned long long wheel7 = 9009416540524545ULL;
@@ -406,62 +374,51 @@ BigInteger CountPrimesTo(const BigInteger& n)
             break;
         }
 
-        if (threadBoundary < p) {
-            dispatch.finish();
-            threadBoundary *= threadBoundary;
-        }
-
         if (notPrime[backward5(p)]) {
             continue;
         }
 
         ++count;
 
-        dispatch.dispatch([&n, p, &notPrime]() {
-            // We are skipping multiples of 2, 3, and 5
-            // for space complexity, for 4/15 the bits.
-            // More are skipped by the wheel for time.
-            const BigInteger p2 = p << 1U;
-            const BigInteger p4 = p << 2U;
-            BigInteger i = p * p;
+        // We are skipping multiples of 2, 3, and 5
+        // for space complexity, for 4/15 the bits.
+        // More are skipped by the wheel for time.
+        const BigInteger p2 = p << 1U;
+        const BigInteger p4 = p << 2U;
+        BigInteger i = p * p;
 
-            // "p" already definitely not a multiple of 3.
-            // Its remainder when divided by 3 can be 1 or 2.
-            // If it is 2, we can do a "half iteration" of the
-            // loop that would handle remainder of 1, and then
-            // we can proceed with the 1 remainder loop.
-            // This saves 2/3 of updates (or modulo).
-            if ((p % 3U) == 2U) {
+        // "p" already definitely not a multiple of 3.
+        // Its remainder when divided by 3 can be 1 or 2.
+        // If it is 2, we can do a "half iteration" of the
+        // loop that would handle remainder of 1, and then
+        // we can proceed with the 1 remainder loop.
+        // This saves 2/3 of updates (or modulo).
+        if ((p % 3U) == 2U) {
+            notPrime[backward5(i)] = true;
+            i += p2;
+            if (i > n) {
+                continue;
+            }
+        }
+
+        for (;;) {
+            if (i % 5U) {
                 notPrime[backward5(i)] = true;
-                i += p2;
-                if (i > n) {
-                    return false;
-                }
+            }
+            i += p4;
+            if (i > n) {
+                break;
             }
 
-            for (;;) {
-                if (i % 5U) {
-                    notPrime[backward5(i)] = true;
-                }
-                i += p4;
-                if (i > n) {
-                    return false;
-                }
-
-                if (i % 5U) {
-                    notPrime[backward5(i)] = true;
-                }
-                i += p2;
-                if (i > n) {
-                    return false;
-                }
+            if (i % 5U) {
+                notPrime[backward5(i)] = true;
             }
-
-            return false;
-        });
+            i += p2;
+            if (i > n) {
+                break;
+            }
+        }
     }
-
-    dispatch.finish();
 
     for (;;) {
         const BigInteger p = forward3(o);
@@ -536,37 +493,32 @@ BigInteger SegmentedCountPrimesTo(BigInteger n)
         // to find primes in current range
         for (size_t k = 3U; k < sqrtIndex; ++k) {
             const BigInteger& p = knownPrimes[k];
-            dispatch.dispatch([&fLo, &low, &cardinality, p, &notPrime]() {
-                // We are skipping multiples of 2.
-                const BigInteger p2 = p << 1U;
+            // We are skipping multiples of 2.
+            const BigInteger p2 = p << 1U;
 
-                // Find the minimum number in [low..high] that is
-                // a multiple of prime[i] (divisible by prime[i])
-                // For example, if low is 31 and prime[i] is 3,
-                // we start with 33.
-                BigInteger i = (fLo / p) * p;
-                if (i < fLo) {
-                    i += p;
-                }
-                if ((i & 1U) == 0U) {
-                    i += p;
-                }
+            // Find the minimum number in [low..high] that is
+            // a multiple of prime[i] (divisible by prime[i])
+            // For example, if low is 31 and prime[i] is 3,
+            // we start with 33.
+            BigInteger i = (fLo / p) * p;
+            if (i < fLo) {
+                i += p;
+            }
+            if ((i & 1U) == 0U) {
+                i += p;
+            }
 
-                for (;;) {
-                    const size_t o = backward5(i) - low;
-                    if (o > cardinality) {
-                        return false;
-                    }
-                    if ((i % 3U) && (i % 5U)) {
-                        notPrime[o] = true;
-                    }
-                    i += p2;
+            for (;;) {
+                const size_t o = backward5(i) - low;
+                if (o > cardinality) {
+                    break;
                 }
-
-                return false;
-            });
+                if ((i % 3U) && (i % 5U)) {
+                    notPrime[o] = true;
+                }
+                i += p2;
+            }
         }
-        dispatch.finish();
 
         if (knownPrimes.back() >= sqrtnp1) {
             for (size_t o = 1U; o <= cardinality; ++o) {

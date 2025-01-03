@@ -11,8 +11,8 @@ with open(README_PATH) as readme_file:
 ext_modules = [
     Extension(
         '_eratosthenes',
-        ['Eratosthenes/_eratosthenes.cpp', "Eratosthenes/dispatchqueue.cpp"],
-        include_dirs=['Eratosthenes/include', 'pybind11/include'],
+        ['Eratosthenes/_eratosthenes.cpp'],
+        include_dirs=['pybind11/include'],
         language='c++',
         extra_compile_args = cpp_args,
     ),
@@ -20,7 +20,7 @@ ext_modules = [
 
 setup(
     name='Eratosthenes',
-    version='4.0.8',
+    version='4.0.9',
     author='Dan Strano',
     author_email='dan@unitary.fund',
     description='Fast prime generation for Python based on Sieve of Eratosthenes',
