@@ -171,7 +171,7 @@ std::vector<BigInteger> SieveOfEratosthenes(const BigInteger& n)
         knownPrimes.push_back(p);
 
         dispatch.dispatch([&n, p, &notPrime]() {
-            for (BigInteger i = p * p; i <= n; i += 11U * p) {
+            for (BigInteger i = p * p; i <= n; i += 2310U * p) {
                 notPrime[backward11(i)] = true;
             }
             return false;
@@ -256,7 +256,7 @@ BigInteger CountPrimesTo(const BigInteger& n)
         ++count;
 
         dispatch.dispatch([&n, p, &notPrime]() {
-            for (BigInteger i = p * p; i <= n; i += 11U * p) {
+            for (BigInteger i = p * p; i <= n; i += 2310U * p) {
                 notPrime[backward11(i)] = true;
             }
             return false;
@@ -355,7 +355,7 @@ std::vector<BigInteger> SegmentedSieveOfEratosthenes(BigInteger n)
                     i += p2;
                 }
 
-                for (; i <= n; i += 11U * p) {
+                for (; i <= n; i += 2310U * p) {
                     notPrime[backward11(i)] = true;
                 }
                 return false;
@@ -459,7 +459,7 @@ BigInteger SegmentedCountPrimesTo(BigInteger n)
                     i += p2;
                 }
 
-                for (; i <= n; i += 11U * p) {
+                for (; i <= n; i += 2310U * p) {
                     notPrime[backward11(i)] = true;
                 }
                 return false;
