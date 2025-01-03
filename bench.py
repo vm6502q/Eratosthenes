@@ -1,5 +1,5 @@
 import time
-from eratosthenes import segmented_count
+from Eratosthenes import segmented_count
 
 
 start = time.perf_counter()

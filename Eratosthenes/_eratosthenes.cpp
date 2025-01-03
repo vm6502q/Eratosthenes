@@ -183,7 +183,7 @@ std::vector<BigInteger> SieveOfEratosthenes(const BigInteger& n)
     for (;;) {
         o += GetWheel5and7Increment(wheel5, wheel7);
 
-        const BigInteger p = forward2and3(o);
+        const BigInteger p = forward3(o);
         if ((p * p) > n) {
             break;
         }
@@ -246,7 +246,7 @@ std::vector<BigInteger> SieveOfEratosthenes(const BigInteger& n)
     dispatch.finish();
 
     for (;;) {
-        const BigInteger p = forward2and3(o);
+        const BigInteger p = forward3(o);
         if (p > n) {
             break;
         }
@@ -401,7 +401,7 @@ BigInteger CountPrimesTo(const BigInteger& n)
     for (;;) {
         o += GetWheel5and7Increment(wheel5, wheel7);
 
-        const BigInteger p = forward2and3(o);
+        const BigInteger p = forward3(o);
         if ((p * p) > n) {
             break;
         }
@@ -464,7 +464,7 @@ BigInteger CountPrimesTo(const BigInteger& n)
     dispatch.finish();
 
     for (;;) {
-        const BigInteger p = forward2and3(o);
+        const BigInteger p = forward3(o);
         if (p > n) {
             break;
         }
