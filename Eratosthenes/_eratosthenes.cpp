@@ -151,7 +151,7 @@ std::vector<BigInteger> SieveOfEratosthenes(const BigInteger& n)
         return std::vector<BigInteger>(knownPrimes.begin(), highestPrimeIt);
     }
 
-    knownPrimes.reserve((size_t)(((double)n) / log((double)n)));
+    knownPrimes.reserve(std::expint(log((double)n)) - std::expint(log(2)));
 
     // We are excluding multiples of the first few
     // small primes from outset. For multiples of
@@ -263,7 +263,7 @@ std::vector<BigInteger> SegmentedSieveOfEratosthenes(BigInteger n)
         return SieveOfEratosthenes(n);
     }
     std::vector<BigInteger> knownPrimes = SieveOfEratosthenes(limit);
-    knownPrimes.reserve((size_t)(((double)n) / log((double)n)));
+    knownPrimes.reserve(std::expint(log((double)n)) - std::expint(log(2)));
 
     // Divide the range in different segments
     const size_t nCardinality = backward5(n);
@@ -465,7 +465,7 @@ BigInteger SegmentedCountPrimesTo(BigInteger n)
     const BigInteger practicalLimit = (sqrtnp1 < limit) ? sqrtnp1 : limit;
     std::vector<BigInteger> knownPrimes = SieveOfEratosthenes(practicalLimit);
     if (practicalLimit < sqrtnp1) {
-        knownPrimes.reserve((size_t)(((double)n) / log((double)n)));
+        knownPrimes.reserve(std::expint(log((double)sqrtnp1)) - std::expint(log(2)));
     }
     size_t count = knownPrimes.size();
 
